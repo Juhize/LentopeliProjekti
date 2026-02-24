@@ -1,0 +1,32 @@
+import mysql.connector
+
+def peli_valikko():
+     valinta = int(input("\n1. Aloita uusi peli\n2. Jatka tallenettua peli\n3. Poistu\n"))
+     while valinta != 1 and valinta != 2 and valinta != 3:
+          valinta = int(input("Tuntematon komento anna uusi komento\n"))
+     if valinta == 1:
+         # Valinta 1 teemme olio ohjelman, joka suorittaa SQL lausekkeen, jossa se lisää uuden pelaajan tietokantaan
+         annettu_player_name = input ("Anna käyttäjälle nimi: ")
+         creation = yhteys_sql.cursor()
+         # Käytämme aikasemmin tehtyä muuttujaa sql lauseessa VALUES osassa
+         sql = (f"insert into game(screen_name) VALUES ('{annettu_player_name}');")
+         creation.execute(sql)
+         # Käytetään commit() lauseketta, koska käytämme INSERT:tiä ja haluamme tallentaa pelaajan, joka on luotu
+         yhteys_sql.commit()
+     elif valinta == 2:
+          print ("Juu")
+     elif valinta == 3:
+          print ("Yes")
+
+
+yhteys_sql = mysql.connector.connect(
+         host='127.0.0.1',
+         port= 3306,
+         database='flight_game',
+         user='osku',
+         password='1230',
+         autocommit=True
+         )
+
+
+peli_valikko()
