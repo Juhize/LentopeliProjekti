@@ -112,7 +112,12 @@ def valitse(tulos, numero, player_name):
         return None
     valittu_kenttä = tulos[numero - 1]
     tallenna_sijainti(player_name, valittu_kenttä[0])
-    print(f"\nTervetuloa lentokentälle: {valittu_kenttä[0]}!")
+    lentokenttä_1 = yhteys_sql.cursor()
+    sql_kentän_nimi = (f"select airport.name from airport inner join game on location = ident where screen_name = '{player_name}'")
+    lentokenttä_1.execute(sql_kentän_nimi)
+    lentokenttä_sijainti = lentokenttä_1.fetchall()
+    sijainti_siisti = [names[0] for names in lentokenttä_sijainti]
+    print(f"\nTervetuloa lentokentälle: {sijainti_siisti[0]}!")
     return valittu_kenttä
 
 import mysql.connector
