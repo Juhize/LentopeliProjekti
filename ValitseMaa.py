@@ -45,7 +45,7 @@ yhteys = mysql.connector.connect(
          port= 3306,
          database='flight_game',
          user='root',
-         password='AxuWaldo1?',
+         password='',
          autocommit=True
          )
 
@@ -60,4 +60,5 @@ while not tulos:
 
 if tulos:
     lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
+
     kentta = valitse(tulos, lentokentta, 1)
