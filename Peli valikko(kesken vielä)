@@ -1,5 +1,3 @@
-import mysql.connector
-
 def peli_valikko():
     valinta = input("\n1. Aloita uusi peli\n2. Jatka tallenettua peli\n3. Poistu\n")
 
@@ -26,9 +24,7 @@ def peli_valikko():
          creation.execute(sql_testi)
          player_lista = creation.fetchall()
          # Tässä luomme uuden listan, koska SQL palaava lista on tuple eikä merkkijono
-         player_tarkistus = []
-         for names in player_lista:
-             player_tarkistus.append(names[0])
+         player_tarkistus = [names[0] for names in player_lista]
          if creation.rowcount > 0:
              # Tässä luotu player_tarkistus lista tarkistetaan onko olevassa olevaa nimeä jo relaatiokannassa
              while annettu_player_name in player_tarkistus:
@@ -57,4 +53,5 @@ yhteys_sql = mysql.connector.connect(
 
 
 peli_valikko()
+
 
