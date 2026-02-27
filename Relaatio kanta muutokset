@@ -1,1 +1,10 @@
+ALTER TABLE goal_reached
+DROP FOREIGN KEY goal_reached_ibfk_1;
 
+ALTER TABLE game
+MODIFY id INT NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE goal_reached
+ADD CONSTRAINT goal_reached_ibfk_1
+FOREIGN KEY (goal_id)
+REFERENCES game(id);
