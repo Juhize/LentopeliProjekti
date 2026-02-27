@@ -11,8 +11,5 @@ FOREIGN KEY (goal_id)
 REFERENCES game(id);
 
 Muttaa game taulussa, että pelaaja voi vain lisästä uniikin nimen
-ALTER TABLE kayttajat
-ADD UNIQUE (nimi);
-
-ALTER TABLE kayttajat
-ADD CONSTRAINT uniikki_nimi UNIQUE (nimi);
+ALTER TABLE game
+ADD UNIQUE (screen_name);
