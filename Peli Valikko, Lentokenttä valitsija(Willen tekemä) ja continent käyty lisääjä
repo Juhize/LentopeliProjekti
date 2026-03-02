@@ -27,11 +27,10 @@ def peli_valikko():
 
          # Tässä luomme uuden listan, koska SQL palaava lista on tuple eikä merkkijono
          player_tarkistus = [names[0] for names in player_lista]
-         if creation.rowcount > 0:
-             # Tässä luotu player_tarkistus lista tarkistetaan onko olevassa olevaa nimeä jo relaatiokannassa
-             while annettu_player_name in player_tarkistus:
-                 print("Pelaaja nimi on jo käytössä")
-                 annettu_player_name = input("Anna toinen nimi: ")
+         # Tässä luotu player_tarkistus lista tarkistetaan onko olevassa olevaa nimeä jo relaatiokannassa
+         while annettu_player_name in player_tarkistus:
+             print("Pelaaja nimi on jo käytössä")
+             annettu_player_name = input("Anna toinen nimi: ")
 
          # Käytetään commit() lauseketta, koska käytämme INSERT:tiä ja haluamme tallentaa pelaajan, joka on luotu
          sql = (f"insert into game(screen_name) VALUES ('{annettu_player_name}');")
