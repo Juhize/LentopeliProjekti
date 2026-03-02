@@ -136,6 +136,15 @@ def continent_tarkistus():
     else:
         print("Ei lisäystä")
 
+def nykyinen_pelaajan_lentokenttä():
+    sql_sijainti = f"select country.name, airport.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}';"
+    creation.execute(sql_sijainti)
+    sql_sijainti_paikat = creation.fetchall()
+    for names in sql_sijainti_paikat:
+        print (f"Maa missä sijaitset: {names[0]}\nLentokenttällä: {names[1]}")
+
+
+
 import mysql.connector
 
 yhteys_sql = mysql.connector.connect(
@@ -150,10 +159,9 @@ yhteys_sql = mysql.connector.connect(
 maan_nimi = ""
 tulos = []
 player_name = peli_valikko()
-
 print (f"Pelaat nyt käyttäjällä: {player_name}")
-
 creation = yhteys_sql.cursor()
+nykyinen_lentokenttä = nykyinen_pelaajan_lentokenttä()
 
 player_id = f"select game.id from game where screen_name = ('{player_name}')"
 creation.execute(player_id)
