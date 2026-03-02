@@ -1,0 +1,15 @@
+alter table goal_reached add column continent.id varchar(40) NOT NULL;
+
+alter table goal_reached modify goal_id int(11) null;
+
+alter table game modify column game.id int not null auto_increment;
+
+alter table airport drop foreign key airport_ibfk_1;
+
+alter table country drop primary key;
+
+alter table airport add constraint fk_iso foreign key (iso_country) references country(iso_country);
+
+alter table country add index idx (continent);
+
+alter table goal_reached add constraint fk_continent foreign key (continent_id) references country(continent);
