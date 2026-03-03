@@ -13,3 +13,6 @@ REFERENCES game(id);
 Muttaa game taulussa, että pelaaja voi vain lisästä uniikin nimen
 ALTER TABLE game
 ADD UNIQUE (screen_name);
+
+ALTER TABLE game CHANGE co2_consumed balance INT(11) DEFAULT 2000;
+ALTER TABLE game CHANGE co2_budget flights INT(3) DEFAULT 0;
