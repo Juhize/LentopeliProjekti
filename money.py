@@ -6,8 +6,7 @@
 import random
 import mysql.connector
 #Seuraavat 2 riviä on testausta varten
-#   -current_id olisi kyllä hyvä globaaliksi muuttujaksi, sehän ei muutu kesken pelin
-current_id = 1
+player_id = 1
 lentokentta = 2
 yhteys = mysql.connector.connect(
 host='127.0.0.1',
@@ -20,7 +19,7 @@ autocommit=True
 
 def money(lentokentta, Flight_counter):
     CO2Tax = 1 - (Flight_counter //3*0.2)
-    sql = f"SELECT balance FROM game WHERE id = {current_id}"
+    sql = f"SELECT balance FROM game WHERE id = {player_id}"
     kursori = yhteys.cursor()
     kursori.execute(sql)
     tulos = kursori.fetchone()
@@ -31,7 +30,7 @@ def money(lentokentta, Flight_counter):
     elif lentokentta == 3:
         tuotto = tulos[0] + random.randint(400,2000) * CO2Tax - 800
     Flight_counter +=1
-    kursori.execute(f'UPDATE game SET balance = {tuotto} WHERE id={current_id}')
+    kursori.execute(f'UPDATE game SET balance = {tuotto} WHERE id={player_id}')
     return int(tuotto), Flight_counter
 #Seuraava on testausta varten
 Flight_counter= 0
