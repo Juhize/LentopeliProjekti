@@ -1,40 +1,36 @@
-import mysql.connector
-
 def peli_valikko():
     # Tehdään muuttuja nimellä "silmukka" sitä varten, jos tietokannassa ei ole käyttäjiä ja pelaaja koittaa
     # jatkaa käyttäjänimellä peliä jolloin ohjelma kutsuu tätä samaa funktioo uudelleen ja saadaan silmukka aikaiseksi
     silmukka = True
     valinta = input("\n1. Aloita uusi peli\n2. Jatka tallenettua peli\n3. Poistu\n")
+    creation = yhteys_sql.cursor()
 
     # Tässä if lausekkeessa varmistamme, että pelaaja antaa 1, 2 tai 3 komennon ja muuttaa merkkijonosta numeroksi, jos näin on
-
     if valinta in ["1", "2", "3"]:
         valinta = int(valinta)
 
     # Tässä tehdään while loop jos aikaisempi if lause ei täyty ja annettu input ei ole valikossa
     # Tällä while loppilla voimme vällttää ohelman kaatumisen, jos pelaaja antaa väärän komennon ja kysyy uudelleen komentoa
-
     while valinta not in [1, 2, 3]:
          valinta = input("Tuntematon komento anna uusi komento\n1. Aloita uusi peli\n2. Jatka tallenettua peli\n3. Poistu\n")
          if valinta in ["1", "2", "3"]:
              valinta = int(valinta)
-    if valinta == 1:
 
+    if valinta == 1:
          # Valinta 1 teemme olio ohjelman, joka suorittaa SQL lausekkeen, jossa se lisää uuden pelaajan tietokantaan
          annettu_player_name = input ("Anna käyttäjälle nimi: ")
-         creation = yhteys_sql.cursor()
-
          # Tässä teemme SQL testin ja luomme listan jossa tarkistamme onko käyttäjänimi jo olemassa
          sql_testi = ("select screen_name from game")
          creation.execute(sql_testi)
          player_lista = creation.fetchall()
+
          # Tässä luomme uuden listan, koska SQL palaava lista on tuple eikä merkkijono
          player_tarkistus = [names[0] for names in player_lista]
-         if creation.rowcount > 0:
-             # Tässä luotu player_tarkistus lista tarkistetaan onko olevassa olevaa nimeä jo relaatiokannassa
-             while annettu_player_name in player_tarkistus:
-                 print("Pelaaja nimi on jo käytössä")
-                 annettu_player_name = input("Anna toinen nimi: ")
+         # Tässä luotu player_tarkistus lista tarkistetaan onko olevassa olevaa nimeä jo relaatiokannassa
+         while annettu_player_name in player_tarkistus:
+             print("Pelaaja nimi on jo käytössä")
+             annettu_player_name = input("Anna toinen nimi: ")
+
          # Käytetään commit() lauseketta, koska käytämme INSERT:tiä ja haluamme tallentaa pelaajan, joka on luotu
          sql = (f"insert into game(screen_name) VALUES ('{annettu_player_name}');")
          print (f"Pelaaja luotu nimellä: {annettu_player_name}")
@@ -43,7 +39,6 @@ def peli_valikko():
 
     elif valinta == 2:
           # Tässä tulostamme listan pelaajista ja pelaaja voi valita käyttäjän
-          creation = yhteys_sql.cursor()
           sql_lista = ("select screen_name from game")
           creation.execute(sql_lista)
           player_lista = creation.fetchall()
@@ -52,16 +47,18 @@ def peli_valikko():
           if creation.rowcount > 0:
               print ("Valitse käyttäjä vastaavalla numerolla listassa:")
               # Tässä luomme listan pelaajista relaatiokannassa ja jokaiselle valinalle annamme ideksin len tulolla
+              pelaaja_lista_numeroina = []
               for numero in range (len(player_lista_siisti)):
-                  print (f"{numero + 1}. {player_lista_siisti[numero]}")
-                  pelaaja_lista_numeroina = []
+                  print (f"{numero + 1} {player_lista_siisti[numero]}")
                   pelaaja_lista_numeroina.append (numero + 1)
                   listassa_pelaajia = True
-              pelaajan_valinta = int(input(""))
-              while pelaajan_valinta not in pelaaja_lista_numeroina:
-                  pelaajan_valinta = int(input("Käyttäjä numeroa ei ole anna uusi:\n"))
+                  pelaaja_lista_numeroina_str = [str(nimi) for nimi in pelaaja_lista_numeroina]
+              pelaajan_valinta = input("")
+              while pelaajan_valinta not in pelaaja_lista_numeroina_str:
+                  pelaajan_valinta = input("Käyttäjä numeroa ei ole anna uusi:\n")
 
-              if pelaajan_valinta in pelaaja_lista_numeroina:
+              if pelaajan_valinta in pelaaja_lista_numeroina_str:
+                  pelaajan_valinta = int(pelaajan_valinta)
                   annettu_player_name = (player_lista_siisti[pelaajan_valinta - 1])
           if not listassa_pelaajia:
               print("Ei tallennettuja käyttäjiä")
@@ -75,18 +72,4 @@ def peli_valikko():
         # vaikka relaatiokannassa ei ole käyttäjiä
         peli_valikko()
     return annettu_player_name
-
-
-yhteys_sql = mysql.connector.connect(
-         host='127.0.0.1',
-         port= 3306,
-         database='flight_game',
-         user='osku',
-         password='1230',
-         autocommit=True
-         )
-
-
-player_name = peli_valikko()
-print (player_name)
 
