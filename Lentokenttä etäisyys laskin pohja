@@ -1,3 +1,9 @@
+import mysql.connector
+from geopy import distance
+
+def matka_laskin(icao1, icao2):
+    sql = f"SELECT latitude_deg, longitude_deg FROM airport WHERE ident= '{icao1}' or ident = '{icao2}'"
+    kursori = yhteys.cursor()
     kursori.execute(sql)
     tulos = kursori.fetchall()
     lentokenttä_etäisyys = {}
