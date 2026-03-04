@@ -3,6 +3,11 @@
 # -Varmaan pienennän kiinteitä lentokenttämaksuja tämän jälkeen
 #Puuttuu lentojen määrän päivitys tietokantaan
 
+#Tehdään vielä uusi funktio, mikä laskee lentokenttien etäisyyden 
+#ja ilmoittaa pelaajalle lennon kokonaiskustannuksen
+#Uutta funktiota käytetään tämän funktion laskutoimituksessa
+
+
 import random
 import mysql.connector
 #Seuraavat 2 riviä on testausta varten
