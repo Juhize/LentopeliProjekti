@@ -1,5 +1,4 @@
 def peli_valikko():
-
     # Tehdään muuttuja nimellä "silmukka" sitä varten, jos tietokannassa ei ole käyttäjiä ja pelaaja koittaa
     # jatkaa käyttäjänimellä peliä jolloin ohjelma kutsuu tätä samaa funktioo uudelleen ja saadaan silmukka aikaiseksi
     silmukka = True
@@ -50,14 +49,16 @@ def peli_valikko():
               # Tässä luomme listan pelaajista relaatiokannassa ja jokaiselle valinalle annamme ideksin len tulolla
               pelaaja_lista_numeroina = []
               for numero in range (len(player_lista_siisti)):
-                  print (f"{numero + 1}. {player_lista_siisti[numero]}")
+                  print (f"{numero + 1} {player_lista_siisti[numero]}")
                   pelaaja_lista_numeroina.append (numero + 1)
                   listassa_pelaajia = True
-              pelaajan_valinta = int(input(""))
-              while pelaajan_valinta not in pelaaja_lista_numeroina:
-                  pelaajan_valinta = int(input("Käyttäjä numeroa ei ole anna uusi:\n"))
+                  pelaaja_lista_numeroina_str = [str(nimi) for nimi in pelaaja_lista_numeroina]
+              pelaajan_valinta = input("")
+              while pelaajan_valinta not in pelaaja_lista_numeroina_str:
+                  pelaajan_valinta = input("Käyttäjä numeroa ei ole anna uusi:\n")
 
-              if pelaajan_valinta in pelaaja_lista_numeroina:
+              if pelaajan_valinta in pelaaja_lista_numeroina_str:
+                  pelaajan_valinta = int(pelaajan_valinta)
                   annettu_player_name = (player_lista_siisti[pelaajan_valinta - 1])
           if not listassa_pelaajia:
               print("Ei tallennettuja käyttäjiä")
@@ -119,33 +120,59 @@ def valitse(tulos, numero, player_name):
     return valittu_kenttä
 
 def continent_tarkistus():
+    # Tässä funktiossa käymme ensin etsimässä pelaajan nykyisen mantereen, jossa hän on ja muutamme sen listasta yksitäiseksi merkkijonoksi
     sql_continent_player = (f"select country.continent from country inner join airport on airport.iso_country = country.iso_country inner join game on location = ident where screen_name = '{player_name}';")
     creation.execute(sql_continent_player)
     player_continent_1 = creation.fetchall()
     player_continent = [continent[0] for continent in player_continent_1]
     player_continent = player_continent[0]
 
+    # Tässä seuraavasti etsimme goal_reached listasta kaikki continentit, joissa pelaaja on käynyt tallentamallamme player_id muuttujalla
     sql_continent_tarkistus = (f"select continent_id from goal_reached where game_id = '{player_id}';")
     creation.execute(sql_continent_tarkistus)
     sql_player_continent = creation.fetchall()
     sql_continent_lista = [continent[0] for continent in sql_player_continent]
+    # Jos pelaajan nyktinen continent missä hän on ei ole tallenettu vielä goal_reachediin niin se lisätään sinne, jos se on jo tämä koko if lause ohitetaan
     if player_continent not in sql_continent_lista:
         sql_continent_lisäys = f"insert into goal_reached(game_id, continent_id) values('{player_id}', '{player_continent}');"
         creation.execute(sql_continent_lisäys)
         yhteys_sql.commit()
     else:
-        print("Ei lisäystä")
+        print("Olet käynyt nykyisellä mantereella jo aikaisemmin missä olet nyt")
 
 def nykyinen_pelaajan_lentokenttä():
+    # Tässä funktiossa etsimme pelaajan valitsemalla käyttäjänimellä hänen nykyisen sijainti ja ilmoitamme sen, kun hän aloittaa pelaamisen
+    # Printtaus tehdään funktion sisällä tässä
     sql_sijainti = f"select country.name, airport.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}';"
     creation.execute(sql_sijainti)
     sql_sijainti_paikat = creation.fetchall()
     for names in sql_sijainti_paikat:
         print (f"Maa missä sijaitset: {names[0]}\nLentokenttällä: {names[1]}")
 
+def player_id_finder():
+    # Tällä koodilla saamme koko ohjelmalle globaalin player_id, jotta peli voi hakea sitä jatkossa, jos on tarve
+    player_id = f"select game.id from game where screen_name = ('{player_name}')"
+    creation.execute(player_id)
+    playerid = creation.fetchall()
+    player_id = [id[0] for id in playerid]
+    player_id = player_id[0]
+    return player_id
 
+def lentokenttä_arpoja():
+    maan_nimi = ""
+    tulos = []
+    while not tulos:
+        maan_nimi = input("Anna maan nimi: ")
+        tulos = lento_kentät(maan_nimi)
+        if not tulos:
+            print("Maata ei löydy")
+
+    if tulos:
+        lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
+        kentta = valitse(tulos, lentokentta, player_name)
 
 import mysql.connector
+import random
 
 yhteys_sql = mysql.connector.connect(
          host='127.0.0.1',
@@ -156,27 +183,13 @@ yhteys_sql = mysql.connector.connect(
          autocommit=True
          )
 
-maan_nimi = ""
-tulos = []
+
 player_name = peli_valikko()
 print (f"Pelaat nyt käyttäjällä: {player_name}")
 creation = yhteys_sql.cursor()
 nykyinen_lentokenttä = nykyinen_pelaajan_lentokenttä()
+player_id = player_id_finder()
+lentokenttä_arpoja()
 
-player_id = f"select game.id from game where screen_name = ('{player_name}')"
-creation.execute(player_id)
-playerid = creation.fetchall()
-player_id = [id[0] for id in playerid]
-player_id = player_id[0]
-
-while not tulos:
-    maan_nimi = input("Anna maan nimi: ")
-    tulos = lento_kentät(maan_nimi)
-    if not tulos:
-        print("Maata ei löydy")
-
-if tulos:
-    lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
-    kentta = valitse(tulos, lentokentta, player_name)
 
 continent_tarkistus()
