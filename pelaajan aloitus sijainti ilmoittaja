@@ -1,0 +1,8 @@
+def nykyinen_pelaajan_lentokenttä():
+    # Tässä funktiossa etsimme pelaajan valitsemalla käyttäjänimellä hänen nykyisen sijainti ja ilmoitamme sen, kun hän aloittaa pelaamisen
+    # Printtaus tehdään funktion sisällä tässä
+    sql_sijainti = f"select country.name, airport.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}';"
+    creation.execute(sql_sijainti)
+    sql_sijainti_paikat = creation.fetchall()
+    for names in sql_sijainti_paikat:
+        print (f"Maa missä sijaitset: {names[0]}\nLentokenttällä: {names[1]}")
