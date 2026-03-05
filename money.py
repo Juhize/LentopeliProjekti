@@ -1,9 +1,5 @@
-#Funktioon tarvitaan rakenne, joka mittaa etäisyyttä lentokenttien välillä, minkä mukaan lisätään menoihin lennon pituudesta riippuva elementti 
-# -Varmaan pienennän kiinteitä lentokenttämaksuja tämän jälkeen
-#Tehdään vielä uusi funktio, mikä laskee lentokenttien etäisyyden 
-#ja ilmoittaa pelaajalle lennon kokonaiskustannuksen
-#Uutta funktiota käytetään tämän funktion laskutoimituksessa
-
+#Luon funktion flight_cost, mikä laskee lennon kokonaiskustannukset mukaanlukien etäisyyspohjaisen hinnan
+#   Tulen käyttämään tätä uutta funktiota vielä osana tätä funktiota
 
 import random
 import mysql.connector
