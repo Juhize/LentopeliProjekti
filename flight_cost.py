@@ -17,18 +17,23 @@ seuraava_kentta = "'00AA'"
 
 def flight_cost(seuraava_kentta):
     kursori = yhteys.cursor()
-    sql = f"SELECT latitude_deg, longitude_deg, type FROM airport WHERE ident = (SELECT location FROM game WHERE id = {player_id})OR ident = {seuraava_kentta}"
-    kursori.execute(sql)
-    tulos = kursori.fetchall()
-    lentokenttä_etäisyys = {}
+    #Jouduin erittelemään haut, koska alkuperäisessä haun tuloksien järjestys vaihteli
+    sql1 = f"SELECT latitude_deg, longitude_deg FROM airport WHERE ident = (SELECT location FROM game WHERE id = {player_id})"
+    sql2 = f"SELECT latitude_deg, longitude_deg, type FROM airport WHERE ident = {seuraava_kentta}"
+    kursori.execute(sql1)
+    kentta_1 = kursori.fetchall()
+    kursori.execute(sql2)
+    kentta_2 = kursori.fetchall()
+    tulos = kentta_1, kentta_2
+    piste = {}
     lista_avain = 0
     for number in tulos:
-        lentokenttä_etäisyys[lista_avain] = number[0], number[1]
+    #Nyt kun yhdistettiin 2 listaa tarvitaan ensiksi ideksi listaan ja sen jälkeen haettavaan arvoon
+        piste[lista_avain] = number[0][0], number[0][1]
         lista_avain += 1
     #.km lopussa jättää vastauksesta km pois, milloin saadaan muunnettua muuttuja int-muotoon
-    laskettu_matka = int(distance.distance(lentokenttä_etäisyys[0], lentokenttä_etäisyys[1]).km)
-    #Haen seuraavan kentän [-1] tuplesta viimeisen arvon [-1]
-    airport_type = tulos[-1][-1]
+    laskettu_matka = int(distance.distance(piste[0], piste[1]).km)
+    airport_type = kentta_2[0][-1]
     if airport_type == "small_airport": 
         landing = 400
     elif airport_type == "medium_airport":
@@ -38,5 +43,5 @@ def flight_cost(seuraava_kentta):
     cost = laskettu_matka * hinta_per_km + landing
     return cost
 #Testaus
-tuotto=1000
-print(f"{flight_cost(seuraava_kentta)+tuotto:.0f}")
+#tuotto=1000
+#print(f"{tuotto - flight_cost(seuraava_kentta):.0f}")
