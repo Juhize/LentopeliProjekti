@@ -119,14 +119,22 @@ def valitse(tulos, numero, player_name):
     print(f"\nTervetuloa lentokentälle: {sijainti_siisti[0]}!")
     return valittu_kenttä
 
+from lopetus import (
+    tarkista_peli_loppu,
+    haet_pelaajan_tiedot,
+    nayta_voittoruutu,
+    nayta_highscore_lista,
+
+)
+
 import mysql.connector
 
 yhteys_sql = mysql.connector.connect(
          host='127.0.0.1',
          port= 3306,
          database='flight_game',
-         user='osku',
-         password='1230',
+         user='root',
+         password='123456789',
          autocommit=True
          )
 
@@ -135,12 +143,98 @@ tulos = []
 player_name = peli_valikko()
 print (f"Pelaat nyt käyttäjällä: {player_name}")
 
-while not tulos:
-    maan_nimi = input("Anna maan nimi: ")
-    tulos = lento_kentät(maan_nimi)
-    if not tulos:
-        print("Maata ei löydy")
+def player_id_finder(player_name):
+    kursori = yhteys_sql.cursor()
+    sql = f"select game.id from game where screen_name = '{player_name}'"
+    kursori.execute(sql)
+    playerid = kursori.fetchall()
+    if playerid:
+        return playerid[0][0]
+    return None
 
-if tulos:
-    lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
-    kentta = valitse(tulos, lentokentta, player_name)
+player_id = player_id_finder(player_name)
+print(f"Pelaaja ID: {player_id}")
+
+# Peli jatkuu kunnes voitto tai häviö
+peli_jatkuu = True
+
+while peli_jatkuu:
+    tulos = []
+
+    # Pelaaja valitsee maan
+    while not tulos:
+        maan_nimi = input("Anna maan nimi: ")
+
+        # LISÄÄ TÄMÄ - Tarkista lopeta-komento
+        if maan_nimi.lower() == "lopeta":
+            print("Kiitos pelaamisesta!")
+            nayta_highscore_lista(yhteys_sql)
+            peli_jatkuu = False
+            break  # Lopeta sisempi while-silmukka
+
+        tulos = lento_kentät(maan_nimi)
+        if not tulos:
+            print("Maata ei löydy")
+
+
+    def continent_tarkistus(player_name, player_id):
+        #Tallenna käydyt kontinentit
+        creation = yhteys_sql.cursor()
+
+        sql_continent_player = f"select country.continent from country inner join airport on airport.iso_country = country.iso_country inner join game on location = ident where screen_name = '{player_name}';"
+        creation.execute(sql_continent_player)
+        player_continent_1 = creation.fetchall()
+
+        if not player_continent_1:
+            return
+
+        player_continent = [continent[0] for continent in player_continent_1]
+        player_continent = player_continent[0]
+
+        sql_continent_tarkistus = f"select continent_id from goal_reached where game_id = {player_id};"
+        creation.execute(sql_continent_tarkistus)
+        sql_player_continent = creation.fetchall()
+        sql_continent_lista = [continent[0] for continent in sql_player_continent]
+
+        if player_continent not in sql_continent_lista:
+            sql_continent_lisäys = f"insert into goal_reached(game_id, continent_id) values({player_id}, '{player_continent}');"
+            creation.execute(sql_continent_lisäys)
+            yhteys_sql.commit()
+            print(f"Uusi manner käyty: {player_continent}")
+        else:
+            print("Olet käynyt nykyisellä mantereella jo aikaisemmin")
+
+    # Pelaaja valitsee lentokentän
+    if tulos:
+        lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
+        kentta = valitse(tulos, lentokentta, player_name)
+        continent_tarkistus(player_name, player_id)
+
+    # TARKISTA VOITTO
+    if tarkista_peli_loppu(player_id, yhteys_sql):
+        pelaajan_tiedot = haet_pelaajan_tiedot(player_id, yhteys_sql)
+        if pelaajan_tiedot:
+            nayta_voittoruutu(
+                pelaajan_tiedot["nimi"],
+                pelaajan_tiedot["saldo"],
+                7,
+                yhteys_sql
+            )
+        nayta_highscore_lista(yhteys_sql)
+        break  # Lopeta silmukka
+
+    # TARKISTA HÄVIÖ
+    pitaa_lopettaa, syy = tarkista_lopettaminen(player_id, yhteys_sql)
+    if pitaa_lopettaa:
+        pelaajan_tiedot = haet_pelaajan_tiedot(player_id, yhteys_sql)
+        if pelaajan_tiedot:
+            nayta_tappio_ruutu(pelaajan_tiedot["nimi"], syy)
+        nayta_highscore_lista(yhteys_sql)
+        break  # Lopeta silmukka
+
+
+
+
+
+if __name__ == "__main__":
+    yhteys_sql.close()
