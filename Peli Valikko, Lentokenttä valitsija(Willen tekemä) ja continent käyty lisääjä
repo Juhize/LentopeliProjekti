@@ -52,6 +52,7 @@ def peli_valikko():
                   print (f"{numero + 1} {player_lista_siisti[numero]}")
                   pelaaja_lista_numeroina.append (numero + 1)
                   listassa_pelaajia = True
+                  # Tämän listan luomisella voimme vältää, jos pelaaja antaa väärän inputin
                   pelaaja_lista_numeroina_str = [str(nimi) for nimi in pelaaja_lista_numeroina]
               pelaajan_valinta = input("")
               while pelaajan_valinta not in pelaaja_lista_numeroina_str:
