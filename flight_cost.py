@@ -17,6 +17,7 @@ seuraava_kentta = "'00AA'"
 
 def flight_cost(seuraava_kentta):
     kursori = yhteys.cursor()
+    #Seuraavassa haetaan erikseen kummankin lentokentän koordinaatit ja kohde lentokentän kokotyyppi
     #Jouduin erittelemään haut, koska alkuperäisessä haun tuloksien järjestys vaihteli
     sql1 = f"SELECT latitude_deg, longitude_deg FROM airport WHERE ident = (SELECT location FROM game WHERE id = {player_id})"
     sql2 = f"SELECT latitude_deg, longitude_deg, type FROM airport WHERE ident = {seuraava_kentta}"

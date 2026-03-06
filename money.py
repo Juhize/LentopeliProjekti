@@ -22,6 +22,7 @@ def money(lentokentta, Flight_counter):
     CO2Tax = round(1 - (Flight_counter // 3 * 0.2), 1)
     CO2Tax = max(0.2, CO2Tax)
     kursori = yhteys.cursor()
+    #Seuraavassa haetaan aktiivisen pelaajan rahamäärä
     kursori.execute(f"SELECT balance FROM game WHERE id = {player_id}")
     tulos = kursori.fetchone()
     if lentokentta == 1:
@@ -31,6 +32,7 @@ def money(lentokentta, Flight_counter):
     elif lentokentta == 3:
         tuotto = tulos[0] + random.randint(400,2000) * CO2Tax - 800
     Flight_counter += 1
+    #Seuraavassa päivitetään uusi rahamäärä ja lentojen määrä aktiiviselle pelaajalle
     kursori.execute(f'UPDATE game SET balance = {int(tuotto)}, flights = {int(Flight_counter)} WHERE id={player_id}')
     return int(tuotto), Flight_counter
 
