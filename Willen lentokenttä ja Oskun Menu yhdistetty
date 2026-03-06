@@ -1,5 +1,4 @@
 def peli_valikko():
-
     # Tehdään muuttuja nimellä "silmukka" sitä varten, jos tietokannassa ei ole käyttäjiä ja pelaaja koittaa
     # jatkaa käyttäjänimellä peliä jolloin ohjelma kutsuu tätä samaa funktioo uudelleen ja saadaan silmukka aikaiseksi
     silmukka = True
@@ -27,11 +26,10 @@ def peli_valikko():
 
          # Tässä luomme uuden listan, koska SQL palaava lista on tuple eikä merkkijono
          player_tarkistus = [names[0] for names in player_lista]
-         if creation.rowcount > 0:
-             # Tässä luotu player_tarkistus lista tarkistetaan onko olevassa olevaa nimeä jo relaatiokannassa
-             while annettu_player_name in player_tarkistus:
-                 print("Pelaaja nimi on jo käytössä")
-                 annettu_player_name = input("Anna toinen nimi: ")
+         # Tässä luotu player_tarkistus lista tarkistetaan onko olevassa olevaa nimeä jo relaatiokannassa
+         while annettu_player_name in player_tarkistus:
+             print("Pelaaja nimi on jo käytössä")
+             annettu_player_name = input("Anna toinen nimi: ")
 
          # Käytetään commit() lauseketta, koska käytämme INSERT:tiä ja haluamme tallentaa pelaajan, joka on luotu
          sql = (f"insert into game(screen_name) VALUES ('{annettu_player_name}');")
@@ -51,14 +49,17 @@ def peli_valikko():
               # Tässä luomme listan pelaajista relaatiokannassa ja jokaiselle valinalle annamme ideksin len tulolla
               pelaaja_lista_numeroina = []
               for numero in range (len(player_lista_siisti)):
-                  print (f"{numero + 1}. {player_lista_siisti[numero]}")
+                  print (f"{numero + 1} {player_lista_siisti[numero]}")
                   pelaaja_lista_numeroina.append (numero + 1)
                   listassa_pelaajia = True
-              pelaajan_valinta = int(input(""))
-              while pelaajan_valinta not in pelaaja_lista_numeroina:
-                  pelaajan_valinta = int(input("Käyttäjä numeroa ei ole anna uusi:\n"))
+                  # Tämän listan luomisella voimme vältää, jos pelaaja antaa väärän inputin
+                  pelaaja_lista_numeroina_str = [str(nimi) for nimi in pelaaja_lista_numeroina]
+              pelaajan_valinta = input("")
+              while pelaajan_valinta not in pelaaja_lista_numeroina_str:
+                  pelaajan_valinta = input("Käyttäjä numeroa ei ole anna uusi:\n")
 
-              if pelaajan_valinta in pelaaja_lista_numeroina:
+              if pelaajan_valinta in pelaaja_lista_numeroina_str:
+                  pelaajan_valinta = int(pelaajan_valinta)
                   annettu_player_name = (player_lista_siisti[pelaajan_valinta - 1])
           if not listassa_pelaajia:
               print("Ei tallennettuja käyttäjiä")
@@ -72,7 +73,6 @@ def peli_valikko():
         # vaikka relaatiokannassa ei ole käyttäjiä
         peli_valikko()
     return annettu_player_name
-
 
 def tallenna_sijainti(player_name, airport_id):
     sql = f"UPDATE game SET location = '{airport_id}' where screen_name = '{player_name}'"
