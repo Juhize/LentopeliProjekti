@@ -2,6 +2,7 @@ def peli_valikko():
     # Tehdään muuttuja nimellä "silmukka" sitä varten, jos tietokannassa ei ole käyttäjiä ja pelaaja koittaa
     # jatkaa käyttäjänimellä peliä jolloin ohjelma kutsuu tätä samaa funktioo uudelleen ja saadaan silmukka aikaiseksi
     silmukka = True
+    tehty_käyttäjä = False
     valinta = input("\n1. Aloita uusi peli\n2. Jatka tallenettua peli\n3. Poistu\n")
     creation = yhteys_sql.cursor()
 
@@ -31,11 +32,43 @@ def peli_valikko():
              print("Pelaaja nimi on jo käytössä")
              annettu_player_name = input("Anna toinen nimi: ")
 
-         # Käytetään commit() lauseketta, koska käytämme INSERT:tiä ja haluamme tallentaa pelaajan, joka on luotu
          sql = (f"insert into game(screen_name) VALUES ('{annettu_player_name}');")
-         print (f"Pelaaja luotu nimellä: {annettu_player_name}")
+         print (f"Pelaaja luotu nimellä: {annettu_player_name}\n")
          creation.execute(sql)
-         yhteys_sql.commit()
+
+         player_id = player_id_finder(annettu_player_name)
+
+         aloitus_maa = input ("Valitse aloitus maa vastaavalla numerolla:\n1. Brazilia\n2. USA\n3. Japani\n4. Eqypti\n5. Suomi\n")
+         while aloitus_maa not in ["1", "2", "3", "4", "5"]:
+             aloitus_maa = input ("Virheellinen valinta anna uudelleen")
+         if aloitus_maa in ["1", "2", "3", "4", "5"]:
+             aloitus_maa = int(aloitus_maa)
+             tehty_käyttäjä = True
+         if aloitus_maa == 1:
+             sql_aloitus_maa = f"UPDATE game SET location = 'SBGR' where screen_name = '{annettu_player_name}'"
+             sql_aloitus_manner = f"insert into goal_reached(game_id, continent_id) values('{player_id}', 'SA')"
+             creation.execute(sql_aloitus_maa)
+             creation.execute(sql_aloitus_manner)
+         elif aloitus_maa == 2:
+             sql_aloitus_maa = f"UPDATE game SET location = 'KDFW' where screen_name = '{annettu_player_name}'"
+             sql_aloitus_manner = f"insert into goal_reached(game_id, continent_id) values('{player_id}', 'NA')"
+             creation.execute(sql_aloitus_maa)
+             creation.execute(sql_aloitus_manner)
+         elif aloitus_maa == 3:
+             sql_aloitus_maa = f"UPDATE game SET location = 'RJTT' where screen_name = '{annettu_player_name}'"
+             sql_aloitus_manner = f"insert into goal_reached(game_id, continent_id) values('{player_id}', 'AS')"
+             creation.execute(sql_aloitus_maa)
+             creation.execute(sql_aloitus_manner)
+         elif aloitus_maa == 4:
+             sql_aloitus_maa = f"UPDATE game SET location = 'HECA' where screen_name = '{annettu_player_name}'"
+             sql_aloitus_manner = f"insert into goal_reached(game_id, continent_id) values('{player_id}', 'AF')"
+             creation.execute(sql_aloitus_maa)
+             creation.execute(sql_aloitus_manner)
+         elif aloitus_maa == 5:
+             sql_aloitus_maa = f"UPDATE game SET location = 'EFHK' where screen_name = '{annettu_player_name}'"
+             sql_aloitus_manner = f"insert into goal_reached(game_id, continent_id) values('{player_id}', 'EU')"
+             creation.execute(sql_aloitus_maa)
+             creation.execute(sql_aloitus_manner)
 
     elif valinta == 2:
           # Tässä tulostamme listan pelaajista ja pelaaja voi valita käyttäjän
@@ -49,7 +82,7 @@ def peli_valikko():
               # Tässä luomme listan pelaajista relaatiokannassa ja jokaiselle valinalle annamme ideksin len tulolla
               pelaaja_lista_numeroina = []
               for numero in range (len(player_lista_siisti)):
-                  print (f"{numero + 1} {player_lista_siisti[numero]}")
+                  print (f"{numero + 1}. {player_lista_siisti[numero]}")
                   pelaaja_lista_numeroina.append (numero + 1)
                   listassa_pelaajia = True
                   # Tämän listan luomisella voimme vältää, jos pelaaja antaa väärän inputin
@@ -71,20 +104,14 @@ def peli_valikko():
     if not silmukka:
         # Tällä funktion kutsulla vältämme, jos pelaaja koittaa jatkaa peliä
         # vaikka relaatiokannassa ei ole käyttäjiä
+        annettu_player_name = ""
         peli_valikko()
+    if tehty_käyttäjä == True:
+        sql_haku = (f"select balance from game where screen_name = '{annettu_player_name}';")
+        creation.execute(sql_haku)
+        tilanne = creation.fetchall()
+        print(f"Aloitus raha määrä: {tilanne[0][0]}€")
     return annettu_player_name
-
-import mysql.connector
-
-yhteys_sql = mysql.connector.connect(
-         host='127.0.0.1',
-         port= 3306,
-         database='flight_game',
-         user='osku',
-         password='1230',
-         autocommit=True
-         )
-
 
 player_name = peli_valikko()
 print (player_name)
