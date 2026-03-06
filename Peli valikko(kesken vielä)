@@ -52,6 +52,7 @@ def peli_valikko():
                   print (f"{numero + 1} {player_lista_siisti[numero]}")
                   pelaaja_lista_numeroina.append (numero + 1)
                   listassa_pelaajia = True
+                  # Tämän listan luomisella voimme vältää, jos pelaaja antaa väärän inputin
                   pelaaja_lista_numeroina_str = [str(nimi) for nimi in pelaaja_lista_numeroina]
               pelaajan_valinta = input("")
               while pelaajan_valinta not in pelaaja_lista_numeroina_str:
@@ -72,4 +73,20 @@ def peli_valikko():
         # vaikka relaatiokannassa ei ole käyttäjiä
         peli_valikko()
     return annettu_player_name
+
+import mysql.connector
+
+yhteys_sql = mysql.connector.connect(
+         host='127.0.0.1',
+         port= 3306,
+         database='flight_game',
+         user='osku',
+         password='1230',
+         autocommit=True
+         )
+
+
+player_name = peli_valikko()
+print (player_name)
+
 
