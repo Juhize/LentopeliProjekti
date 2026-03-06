@@ -12,7 +12,7 @@ yhteys = mysql.connector.connect(
          password='1230',
          autocommit=True
          )
-player_id=3
+player_id=6
 seuraava_kentta = "'00AA'"
 
 def flight_cost(seuraava_kentta):
