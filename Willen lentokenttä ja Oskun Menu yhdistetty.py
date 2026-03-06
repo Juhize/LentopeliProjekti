@@ -124,7 +124,6 @@ from lopetus import (
     haet_pelaajan_tiedot,
     nayta_voittoruutu,
     nayta_highscore_lista,
-
 )
 
 import mysql.connector
@@ -210,7 +209,7 @@ while peli_jatkuu:
         kentta = valitse(tulos, lentokentta, player_name)
         continent_tarkistus(player_name, player_id)
 
-    # TARKISTA VOITTO
+    # Tarkistetaan voitto
     if tarkista_peli_loppu(player_id, yhteys_sql):
         pelaajan_tiedot = haet_pelaajan_tiedot(player_id, yhteys_sql)
         if pelaajan_tiedot:
@@ -221,16 +220,9 @@ while peli_jatkuu:
                 yhteys_sql
             )
         nayta_highscore_lista(yhteys_sql)
-        break  # Lopeta silmukka
+        break
 
-    # TARKISTA HÄVIÖ
-    pitaa_lopettaa, syy = tarkista_lopettaminen(player_id, yhteys_sql)
-    if pitaa_lopettaa:
-        pelaajan_tiedot = haet_pelaajan_tiedot(player_id, yhteys_sql)
-        if pelaajan_tiedot:
-            nayta_tappio_ruutu(pelaajan_tiedot["nimi"], syy)
-        nayta_highscore_lista(yhteys_sql)
-        break  # Lopeta silmukka
+
 
 
 

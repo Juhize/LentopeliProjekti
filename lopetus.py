@@ -71,17 +71,16 @@ def nayta_voittoruutu(pelaajan_nimi, saldo, kontinentit_kayty, yhteys_sql):
 
 
 
-def nayta_highscore_lista(yhteys_sql):
+
 
     # Hakee ja näyttää top 10 pelaajaa voittajien listasta
 
+
+def nayta_highscore_lista(yhteys_sql):
+    """Näytä highscore taulukko"""
     kursori = yhteys_sql.cursor()
 
-    sql = """
-          SELECT screen_name, balance, flights
-          FROM game
-          ORDER BY balance DESC LIMIT 10 \
-          """
+    sql = "SELECT screen_name, balance, flights FROM game ORDER BY balance DESC LIMIT 10"
 
     try:
         kursori.execute(sql)
@@ -89,19 +88,37 @@ def nayta_highscore_lista(yhteys_sql):
 
         if tulokset:
             print("\n" + "=" * 60)
-            print("HIGH SCORE TAULUKKO".center(60))
+            print("HIGHSCORE TAULUKKO".center(60))
             print("=" * 60)
-            print(f"{'#':<3} {'Pelaaja':<25} {'Saldo':<15} {'Lennot':<10}")
+            print("#  Pelaaja                   Saldo      Lennot")
             print("-" * 60)
 
             for idx, (nimi, saldo, lennot) in enumerate(tulokset, 1):
-                print(f"{idx:<3} {nimi:<25} {saldo:<15} {lennot:<10}")
+                print(f"{idx}  {nimi:<25} {saldo}      {lennot}")
 
             print("=" * 60 + "\n")
         else:
-            print("Ei vielä highscore!")
+            print("Ei vielä highscores!")
 
-    except mysql.connector.Error as err:
+    except Exception as err:
         print(f"Virhe highscoren haussa: {err}")
 
+
+def kysytaan_uusi_peli():
+
+    #Kysely siitä että haluaako pelaaja pelata uuden pelin
+
+    valinta = input("\nHaluatko pelata uudelleen? (1 = Kyllä, 2 = Ei): ")
+
+    while valinta not in ["1", "2"]:
+        valinta = input("Virheellinen valinta. Anna 1 tai 2: ")
+
+    return valinta == "1"
+
+def pyydä_maa():
+
+    # Pelaajalta kyselty uutta maata ja kirjoittamalla lopeta poistutaan pelistä
+
+    maa = input("\nAnna uuden maan nimi tai ('lopeta' poistuaksesi): ")
+    return maa
 
