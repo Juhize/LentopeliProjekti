@@ -1,0 +1,39 @@
+def continent_tarkistus():
+    sql_continent_player = (f"select country.continent from country inner join airport on airport.iso_country = country.iso_country inner join game on location = ident where screen_name = '{nimi}';")
+    creation.execute(sql_continent_player)
+    player_continent_1 = creation.fetchall()
+    player_continent = [continent[0] for continent in player_continent_1]
+    player_continent = player_continent[0]
+
+    sql_continent_tarkistus = (f"select continent_id from goal_reached where game_id = '{player_id}';")
+    creation.execute(sql_continent_tarkistus)
+    sql_player_continent = creation.fetchall()
+    sql_continent_lista = [continent[0] for continent in sql_player_continent]
+    if player_continent not in sql_continent_lista:
+        sql_continent_lisäys = f"insert into goal_reached(game_id, continent_id) values('{player_id}', '{player_continent}');"
+        creation.execute(sql_continent_lisäys)
+        yhteys_sql.commit()
+    else:
+        print("Ei lisäystä")
+
+import mysql.connector
+
+
+yhteys_sql = mysql.connector.connect(
+         host='127.0.0.1',
+         port= 3306,
+         database='flight_game',
+         user='osku',
+         password='1230',
+         autocommit=True
+         )
+
+creation = yhteys_sql.cursor()
+player_id = ("select game.id from game where screen_name = ('player_1')")
+creation.execute(player_id)
+playerid = creation.fetchall()
+player_id = [id[0] for id in playerid]
+player_id = player_id[0]
+
+nimi = "player_1"
+continent_tarkistus()
