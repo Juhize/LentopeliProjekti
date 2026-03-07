@@ -229,6 +229,7 @@ def lentokenttä_arpoja():
             kentta = valitse(tulos, lentokentta, player_name)
 def money(lentokentta, icao):
 #Tämä funktio laskee pelaajan lennon tuoton - kulut ja laskee tehtyjen lentojen määrän
+#Funktio myös ilmoittaa pelaajalle edellisen lennon tuoton, kulut, päivitetyn rahatilanteen, tehtyjen lentojen määrän, sekä nykyisen päästökertoimen.
 #Mysteeri syystä ilman pyöristystä luvusta saadaan enemmän desimaaleja, kun pitäisi.
     creation.execute(f"SELECT flights FROM game WHERE id = {player_id}")
     lennot = creation.fetchone()
@@ -238,15 +239,22 @@ def money(lentokentta, icao):
     #Seuraavassa haetaan aktiivisen pelaajan rahamäärä
     creation.execute(f"SELECT balance FROM game WHERE id = {player_id}")
     rahat = creation.fetchone()
+    pieni = random.randint(200,1000) * CO2Tax
+    keskikoko = random.randint(300,1500) * CO2Tax
+    suuri = random.randint(400,2000) * CO2Tax
+    kulut = flight_cost(icao)
     if lentokentta == 1:
-        tuotto = rahat[0] + random.randint(200,1000) * CO2Tax - flight_cost(icao)
+        tuotto = pieni
     elif lentokentta == 2:
-        tuotto = rahat[0] + random.randint(300,1500) * CO2Tax - flight_cost(icao)
+        tuotto = keskikoko
     elif lentokentta == 3:
-        tuotto = rahat[0] + random.randint(400,2000) * CO2Tax - flight_cost(icao)
+        tuotto = suuri
     flight_counter += 1
+    balance = rahat[0] + tuotto - kulut
+    print(f"\nRahat ennen lentoa: {int(rahat[0])}€ \nTuotto: {int(tuotto)}€ \nKulut yhteensä:-{int(kulut)}€ \nSinulla on nyt {int(balance)}€ rahaa.")
+    print(f"Olet suorittanut {int(flight_counter)} lentoa. \nPäästökertoimesi on {round(1 - (flight_counter // 3 * 0.2), 1)}")
     #Seuraavassa päivitetään uusi rahamäärä ja lentojen määrä aktiiviselle pelaajalle
-    creation.execute(f'UPDATE game SET balance = {int(tuotto)}, flights = {int(flight_counter)} WHERE id={player_id}')
+    creation.execute(f'UPDATE game SET balance = {int(balance)}, flights = {int(flight_counter)} WHERE id={player_id}')
 
 import mysql.connector
 import random
