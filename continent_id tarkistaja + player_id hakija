@@ -13,6 +13,15 @@ def continent_tarkistus():
         sql_continent_lisäys = f"insert into goal_reached(game_id, continent_id) values('{player_id}', '{player_continent}');"
         creation.execute(sql_continent_lisäys)
         yhteys_sql.commit()
+
+def player_id_finder(player_name):
+    # Tällä koodilla saamme koko ohjelmalle globaalin player_id, jotta peli voi hakea sitä jatkossa, jos on tarve
+    player_id = f"select game.id from game where screen_name = ('{player_name}')"
+    creation.execute(player_id)
+    playerid = creation.fetchall()
+    player_id = [id[0] for id in playerid]
+    player_id = player_id[0]
+    return player_id
     else:
         print("Ei lisäystä")
 
