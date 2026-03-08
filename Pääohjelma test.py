@@ -434,7 +434,6 @@ while peli_käynnissä == True:
         except Exception as e:
             print(f"Virhe voitto-tarkistuksessa: {e}")
 
-        # ===== TARKISTA HÄVIÖ (resurssit loppu) =====
         if peli_käynnissä == True:  # Tarkista vain jos peli ei ole vielä loppu
             try:
                 pitaa_lopettaa, syy = tarkista_lopettaminen(player_id, yhteys_sql)
