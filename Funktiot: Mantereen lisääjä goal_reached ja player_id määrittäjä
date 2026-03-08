@@ -1,5 +1,5 @@
 def continent_tarkistus():
-    sql_continent_player = (f"select country.continent from country inner join airport on airport.iso_country = country.iso_country inner join game on location = ident where screen_name = '{nimi}';")
+    sql_continent_player = (f"select country.continent from country inner join airport on airport.iso_country = country.iso_country inner join game on location = ident where screen_name = '{player_name}';")
     creation.execute(sql_continent_player)
     player_continent_1 = creation.fetchall()
     player_continent = [continent[0] for continent in player_continent_1]
@@ -24,25 +24,3 @@ def player_id_finder(player_name):
     player_id = [id[0] for id in playerid]
     player_id = player_id[0]
     return player_id
-
-import mysql.connector
-
-
-yhteys_sql = mysql.connector.connect(
-         host='127.0.0.1',
-         port= 3306,
-         database='flight_game',
-         user='osku',
-         password='1230',
-         autocommit=True
-         )
-
-creation = yhteys_sql.cursor()
-player_id = ("select game.id from game where screen_name = ('player_1')")
-creation.execute(player_id)
-playerid = creation.fetchall()
-player_id = [id[0] for id in playerid]
-player_id = player_id[0]
-
-nimi = "player_1"
-continent_tarkistus()
