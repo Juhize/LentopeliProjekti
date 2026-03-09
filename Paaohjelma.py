@@ -115,13 +115,11 @@ def peli_valikko():
         print(f"Aloitus raha määrä: {tilanne[0][0]}€")
     return annettu_player_name
 
-
 def tallenna_sijainti(player_name, airport_id):
     sql = f"UPDATE game SET location = '{airport_id}' where screen_name = '{player_name}'"
     kursori = yhteys_sql.cursor()
     kursori.execute(sql)
     yhteys_sql.commit()
-
 
 def flight_cost(seuraava_kentta):
     # Seuraavassa haetaan erikseen kummankin lentokentän koordinaatit ja kohde lentokentän kokotyyppi
@@ -151,7 +149,6 @@ def flight_cost(seuraava_kentta):
     cost = laskettu_matka * hinta_per_km + landing
     return int(cost)
 
-
 def lento_kentät(nimi):
     tulos = []
 
@@ -175,7 +172,6 @@ def lento_kentät(nimi):
         print(f"{i + 1}. {tulos[i][1]}. Lennon hinta: {(flight_cost(tulos[i][0]))}€")
     return tulos
 
-
 def valitse(tulos, numero, player_name):
     if numero < 1 or numero > len(tulos):
         print("Virheellinen valinta.")
@@ -190,7 +186,6 @@ def valitse(tulos, numero, player_name):
     lentokenttä_sijainti = lentokenttä_1.fetchall()
     print(f"\nTervetuloa lentokentälle: {lentokenttä_sijainti[0][0]}!")
     return valittu_kenttä
-
 
 def continent_tarkistus(player_name):
     # Tässä funktiossa käymme ensin etsimässä pelaajan nykyisen mantereen, jossa hän on ja muutamme sen listasta yksitäiseksi merkkijonoksi
@@ -214,7 +209,6 @@ def continent_tarkistus(player_name):
     else:
         print("")
 
-
 def nykyinen_pelaajan_lentokenttä():
     # Tässä funktiossa etsimme pelaajan valitsemalla käyttäjänimellä hänen nykyisen sijainti ja ilmoitamme sen, kun hän aloittaa pelaamisen
     # Printtaus tehdään funktion sisällä tässä
@@ -223,7 +217,6 @@ def nykyinen_pelaajan_lentokenttä():
     sql_sijainti_paikat = creation.fetchall()
     for names in sql_sijainti_paikat:
         print(f"Olet tällä hetkellä maassa: {names[0]}\nLentokenttällä: {names[1]}\n")
-
 
 def player_id_finder(player_name):
     # Tällä koodilla saamme koko ohjelmalle globaalin player_id, jotta peli voi hakea sitä jatkossa, jos on tarve
@@ -257,7 +250,6 @@ def lentokenttä_arpoja():
             kentta = valitse(tulos, lentokentta, player_name)
             if not tulos:
                 print("Maata ei löydy")
-
 
 def money(lentokentta, icao):
     # Tämä funktio laskee pelaajan lennon tuoton - kulut ja laskee tehtyjen lentojen määrän
@@ -320,40 +312,6 @@ if peli_käynnissä == True:
     print(f"Pelaat nyt käyttäjällä: {player_name}")
     nykyinen_lentokenttä = nykyinen_pelaajan_lentokenttä()
 
-# Tämän voidaan poistaa, jos tuo uudempi on parempi
-# while peli_käynnissä == True:
-#     valinta = input("Valitse toiminto:\n1. Valitse uusi lentokenttä mihin lentää:\n2. Näytä Nykyinen sijainti ja raha tilanne:\n3. Näytä mantereet missä olet käynyt:\n4. Poistu pelistä:\n")
-#     while valinta not in ["1", "2", "3", "4"]:
-#         valinta = input("Tuntematon toiminto. Valitse uudelleen\n")
-#     if valinta in ["1", "2", "3", "4"]:
-#         valinta = int(valinta)
-#     if valinta == 1:
-#         lentokenttä_arpoja()
-#         continent_tarkistus(player_name)
-#     elif valinta == 2:
-#         sql_sijainti = f"select country.name, airport.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}';"
-#         creation.execute(sql_sijainti)
-#         sql_sijainti_paikat = creation.fetchall()
-#         for names in sql_sijainti_paikat:
-#             print(f"Olet tällä hetkellä maassa: {names[0]}\nLentokenttällä: {names[1]}")
-#         sql_haku = (f"select balance from game where screen_name = '{player_name}';")
-#         creation.execute(sql_haku)
-#         tilanne = creation.fetchall()
-#         print (f"Raha tilanne: {tilanne[0][0]}€\n")
-
-#     elif valinta == 3:
-#         sql_haku = (f"select continent_id from goal_reached where game_id = '{player_id}';")
-#         creation.execute(sql_haku)
-#         continent_lista_1 = creation.fetchall()
-#         for name in continent_lista_1:
-#             print (name[0])
-#         print("")
-
-#     elif valinta == 4:
-#         peli_käynnissä = False
-#         print("Peli suljettu. Hei hei")
-#     else:
-#         print("Tuntematon toiminto\n")
 while peli_käynnissä == True:
     valinta = input(
         "Valitse toiminto:\n1. Valitse uusi lentokenttä mihin lentää:\n2. Näytä Nykyinen sijainti ja raha tilanne:\n3. Näytä mantereet missä olet käynyt:\n4. Säännöt:\n5. Poistu pelistä:\n")
@@ -386,7 +344,7 @@ while peli_käynnissä == True:
     elif valinta == 4:
         # Ei ehkä paras tapa luoda ponnahdusikkuna, mutta pohja löytyi helposti
         mymessage = 'Pelissä lennetään rahtia ympäri maailmaa, minkä avulla on tarkoitus rahoittaa pelaajan matka viidelle eri mantereelle.' \
-                    '\nPeli arpoo jokaisella kierroksella pelaajan valittavaksi 3 eri kokoista lentokenttää. Pelaaja saa rahaa vietyään rahtia lentokentälle lentokentän koon mukaan:\n1.Pieni kenttä 200€ - 1000€\n2.Keskikokoinen kenttä 300€ - 1500€\n3.Suuri kenttä 400€ - 2000€' \
+                    '\nPeli arpoo jokaisella kierroksella pelaajan valittavaksi 3 eri kokoista lentokenttää. Pelaaja saa rahaa vietyään rahtia lentokentälle lentokentän koon mukaan:\n1.Pieni kenttä:\nLaskeutuminen -400€\nTuotto: 200€ - 1000€\n2.Keskikokoinen kenttä:\nLaskeutuminen: -600€\nTuotto: 300€ - 1500€\n3.Suuri kenttä:\nLaskeutuminen -800€\nTuotto: 400€ - 2000€' \
                     '\nPelissä on kolmen lennon välein kutistuva päästökerroin 1 - 0.2, mikä vähentää pelaajalle kertyvää tuottoa kertoimen verran.' \
                     '\nMaavalinnassa maan nimi on ilmoitettava englanniksi.'
         title = 'Säännöt'
