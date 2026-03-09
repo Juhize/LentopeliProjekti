@@ -285,40 +285,6 @@ if peli_käynnissä == True:
     print(f"Pelaat nyt käyttäjällä: {player_name}")
     nykyinen_lentokenttä = nykyinen_pelaajan_lentokenttä()
 
-# Tämän voidaan poistaa, jos tuo uudempi on parempi
-# while peli_käynnissä == True:
-#     valinta = input("Valitse toiminto:\n1. Valitse uusi lentokenttä mihin lentää:\n2. Näytä Nykyinen sijainti ja raha tilanne:\n3. Näytä mantereet missä olet käynyt:\n4. Poistu pelistä:\n")
-#     while valinta not in ["1", "2", "3", "4"]:
-#         valinta = input("Tuntematon toiminto. Valitse uudelleen\n")
-#     if valinta in ["1", "2", "3", "4"]:
-#         valinta = int(valinta)
-#     if valinta == 1:
-#         lentokenttä_arpoja()
-#         continent_tarkistus(player_name)
-#     elif valinta == 2:
-#         sql_sijainti = f"select country.name, airport.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}';"
-#         creation.execute(sql_sijainti)
-#         sql_sijainti_paikat = creation.fetchall()
-#         for names in sql_sijainti_paikat:
-#             print(f"Olet tällä hetkellä maassa: {names[0]}\nLentokenttällä: {names[1]}")
-#         sql_haku = (f"select balance from game where screen_name = '{player_name}';")
-#         creation.execute(sql_haku)
-#         tilanne = creation.fetchall()
-#         print (f"Raha tilanne: {tilanne[0][0]}€\n")
-
-#     elif valinta == 3:
-#         sql_haku = (f"select continent_id from goal_reached where game_id = '{player_id}';")
-#         creation.execute(sql_haku)
-#         continent_lista_1 = creation.fetchall()
-#         for name in continent_lista_1:
-#             print (name[0])
-#         print("")
-
-#     elif valinta == 4:
-#         peli_käynnissä = False
-#         print("Peli suljettu. Hei hei")
-#     else:
-#         print("Tuntematon toiminto\n")
 while peli_käynnissä == True:
     valinta = input("Valitse toiminto:\n1. Valitse uusi lentokenttä mihin lentää:\n2. Näytä Nykyinen sijainti ja raha tilanne:\n3. Näytä mantereet missä olet käynyt:\n4. Säännöt:\n5. Poistu pelistä:\n")
     while valinta not in ["1", "2", "3", "4", "5"]:
