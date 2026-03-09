@@ -93,13 +93,16 @@ def peli_valikko():
         peli_valikko()
     if tehty_käyttäjä == True:
         creation.execute(sql_aloitus_maa)
+        creation.execute(sql_aloitus_manner)
     return annettu_player_name
+
 
 def tallenna_sijainti(player_name, airport_id):
     sql = f"UPDATE game SET location = '{airport_id}' where screen_name = '{player_name}'"
     kursori = yhteys_sql.cursor()
     kursori.execute(sql)
     yhteys_sql.commit()
+
 
 def flight_cost(seuraava_kentta):
     # Seuraavassa haetaan erikseen kummankin lentokentän koordinaatit ja kohde lentokentän kokotyyppi
@@ -129,6 +132,7 @@ def flight_cost(seuraava_kentta):
     cost = laskettu_matka * hinta_per_km + landing
     return int(cost)
 
+
 def lento_kentät(nimi):
     tulos = []
 
@@ -152,6 +156,7 @@ def lento_kentät(nimi):
         print(f"{i + 1}. {tulos[i][1]}. Lennon hinta: {(flight_cost(tulos[i][0]))}€")
     return tulos
 
+
 def valitse(tulos, numero, player_name):
     if numero < 1 or numero > len(tulos):
         print("Virheellinen valinta.")
@@ -166,6 +171,7 @@ def valitse(tulos, numero, player_name):
     lentokenttä_sijainti = lentokenttä_1.fetchall()
     print(f"\nTervetuloa lentokentälle: {lentokenttä_sijainti[0][0]}!")
     return valittu_kenttä
+
 
 def continent_tarkistus(player_name):
     # Tässä funktiossa käymme ensin etsimässä pelaajan nykyisen mantereen, jossa hän on ja muutamme sen listasta yksitäiseksi merkkijonoksi
@@ -189,6 +195,27 @@ def continent_tarkistus(player_name):
     else:
         print("")
 
+def continent_lista():
+    sql_haku = (f"select continent_id from goal_reached where game_id = '{player_id}';")
+    creation.execute(sql_haku)
+    continent_lista_1 = creation.fetchall()
+    print("Mantereet joissa olet käynyt: ")
+    # Teemme muutokset printatuille mantereille tässä sanakirjalla, jotta se olisi peleejalle selkeämpää
+    # Tässä voisi myös käyttää if/elif lauseena mutta sanakirjalla saadaan tiivimmäksi ja lyhyemmäksi
+    continent_names = {
+        "EU": "Eurooppa",
+        "AF": "Afrikka",
+        "AS": "Aasia",
+        "NA": "Pohjois-Amerikka",
+        "SA": "Etelä-Amerikka",
+        "AN": "Antarktis",
+        "OC": "Australia ja Oseania",
+    }
+    for name in continent_lista_1:
+        print(continent_names[name[0]])
+    print("")
+
+
 def pelaajan_tilanne():
     # Tässä funktiossa etsimme pelaajan valitsemalla käyttäjänimellä hänen nykyisen sijainti ja ilmoitamme sen, kun hän aloittaa pelaamisen
     # Printtaus tehdään funktion sisällä tässä
@@ -202,6 +229,7 @@ def pelaajan_tilanne():
     tilanne = creation.fetchall()
     print(f"Rahasi tällä hetkellä: {tilanne[0][0]}€\n")
 
+
 def player_id_finder(player_name):
     # Tällä koodilla saamme koko ohjelmalle globaalin player_id, jotta peli voi hakea sitä jatkossa, jos on tarve
     player_id = f"select game.id from game where screen_name = ('{player_name}')"
@@ -210,6 +238,7 @@ def player_id_finder(player_name):
     player_id = [id[0] for id in playerid]
     player_id = player_id[0]
     return player_id
+
 
 def lentokenttä_arpoja():
     maan_nimi = ""
@@ -223,6 +252,7 @@ def lentokenttä_arpoja():
         elif tulos:
             lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
             kentta = valitse(tulos, lentokentta, player_name)
+
 
 def money(lentokentta, icao):
     # Tämä funktio laskee pelaajan lennon tuoton - kulut ja laskee tehtyjen lentojen määrän
@@ -255,6 +285,8 @@ def money(lentokentta, icao):
     # Seuraavassa päivitetään uusi rahamäärä ja lentojen määrä aktiiviselle pelaajalle
     creation.execute(f'UPDATE game SET balance = {int(balance)}, flights = {int(flight_counter)} WHERE id={player_id}')
 
+
+
 import mysql.connector
 import random
 from geopy import distance
@@ -276,8 +308,10 @@ peli_käynnissä = True
 
 # Tätä voi muuttaa suuremmaksi tai pienemmäksi, jos peli on liian helppo tai vaikea
 hinta_per_km = 0.4
+
 if player_name == "":
     peli_käynnissä = False
+
 if peli_käynnissä == True:
     player_id = player_id_finder(player_name)
     print(f"Pelaat nyt käyttäjällä: {player_name}")
@@ -296,13 +330,7 @@ while peli_käynnissä == True:
         pelaajan_tilanne()
 
     elif valinta == "3":
-        sql_haku = (f"select continent_id from goal_reached where game_id = '{player_id}';")
-        creation.execute(sql_haku)
-        continent_lista_1 = creation.fetchall()
-        print ("Mantereet joissa olet käynyt: ")
-        for name in continent_lista_1:
-            print(name[0])
-        print("")
+        continent_lista()
 
     elif valinta == "4":
         # Ei ehkä paras tapa luoda ponnahdusikkuna, mutta pohja löytyi helposti
