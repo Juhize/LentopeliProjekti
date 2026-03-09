@@ -26,3 +26,5 @@ def money(lentokentta, icao):
     print(f"Olet suorittanut {int(flight_counter)} lentoa. \nPäästökertoimesi on {round(1 - (flight_counter // 3 * 0.2), 1)}")
     #Seuraavassa päivitetään uusi rahamäärä ja lentojen määrä aktiiviselle pelaajalle
     creation.execute(f'UPDATE game SET balance = {int(balance)}, flights = {int(flight_counter)} WHERE id={player_id}')
+    # if balance <= 0:
+    #     lopetus_funktio()
