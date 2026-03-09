@@ -17,14 +17,10 @@ ADD UNIQUE (screen_name);
 ALTER TABLE game CHANGE co2_consumed balance INT(11) DEFAULT 2000;
 ALTER TABLE game CHANGE co2_budget flights INT(3) DEFAULT 0;
 
-GOAL_REACHED MUUTOKSET KOKONAISUUDESSA:
-goal_reached | CREATE TABLE `goal_reached` (
-  `game_id` varchar(40) NOT NULL,
-  `goal_id` int(11) DEFAULT NULL,
-  `continent_id` varchar(40) NOT NULL,
-  PRIMARY KEY (`game_id`,`continent_id`),
-  KEY `goalid` (`goal_id`),
-  KEY `continent_id_ibfk_1` (`continent_id`),
-  CONSTRAINT `continent_id_ibfk_1` FOREIGN KEY (`continent_id`) REFERENCES `country` (`continent`),
-  CONSTRAINT `goal_reached_ibfk_1` FOREIGN KEY (`goal_id`) REFERENCES `game` (`id`),
-  CONSTRAINT `goal_reached_ibfk_2` FOREIGN KEY (`goal_id`) REFERENCES `goal` (`id`)
+Muutokset kokonaisuudessa mitä relaatiokantaan ollaan tehty:
+- country taulussa on Continent lisätty pääavaimeksi
+- goal_reached tauluun on lisätty continent_id, joka on vierasavain mikä viittaa countryn: continent pääavaimeen
+- game taulussa id on muutettu auto_incrementiksi
+- game taulussa CO2 budjetti ja consumed on vaihdettu balance ja flight nimmisiin
+- balance default value on 2000
+- flight default value on 0
