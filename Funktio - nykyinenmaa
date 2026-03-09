@@ -1,0 +1,8 @@
+def nykyinen_maa():
+    kursori = yhteys_sql.cursor()
+    sql = f"select country.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}'"
+    kursori.execute(sql)
+    maa = kursori.fetchone()
+    if maa is None:
+        return None
+    return maa[0]
