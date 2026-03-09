@@ -1,0 +1,19 @@
+def continent_lista():
+    sql_haku = (f"select continent_id from goal_reached where game_id = '{player_id}';")
+    creation.execute(sql_haku)
+    continent_lista_1 = creation.fetchall()
+    print("Mantereet joissa olet käynyt: ")
+    # Teemme muutokset printatuille mantereille tässä sanakirjalla, jotta se olisi peleejalle selkeämpää
+    # Tässä voisi myös käyttää if/elif lauseena mutta sanakirjalla saadaan tiivimmäksi ja lyhyemmäksi
+    continent_names = {
+        "EU": "Eurooppa",
+        "AF": "Afrikka",
+        "AS": "Aasia",
+        "NA": "Pohjois-Amerikka",
+        "SA": "Etelä-Amerikka",
+        "AN": "Antarktis",
+        "OC": "Australia ja Oseania",
+    }
+    for name in continent_lista_1:
+        print(continent_names[name[0]])
+    print("")
