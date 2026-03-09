@@ -14,3 +14,11 @@ alter table airport add constraint fk_iso foreign key (iso_country) references c
 alter table goal_reached add constraint fk_continent foreign key (continent_id) references country(continent);
 ALTER TABLE game CHANGE co2_consumed balance INT(11) DEFAULT 2000;
 ALTER TABLE game CHANGE co2_budget flights INT(3) DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS highscore (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  screen_name VARCHAR(50) NOT NULL,
+  final_money INT NOT NULL,
+  flights_count INT NOT NULL,
+  finished_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
