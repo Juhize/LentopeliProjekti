@@ -6,3 +6,12 @@ def nykyinen_maa():
     if maa is None:
         return None
     return maa[0]
+
+while not tulos:
+    maan_nimi = input("Anna maan nimi: ")
+    if nykyinen_maa_nimi and maan_nimi.lower() == nykyinen_maa_nimi.lower():
+        print(f"Olet jo maassa {nykyinen_maa_nimi}")
+    else:
+        tulos = lento_kentät(maan_nimi)
+        if not tulos:
+            print("Maata ei löydy")
