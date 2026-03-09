@@ -253,6 +253,8 @@ def lentokenttä_arpoja():
             print(f"Olet jo maassa {nykyinen_maa_nimi}")
         else:
             tulos = lento_kentät(maan_nimi)
+            lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
+            kentta = valitse(tulos, lentokentta, player_name)
             if not tulos:
                 print("Maata ei löydy")
 
