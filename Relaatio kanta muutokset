@@ -1,22 +1,3 @@
-Muuttaa game taulussa game.id tekemään automaattisesti id kun screen_name luodaan
-ALTER TABLE goal_reached
-DROP FOREIGN KEY goal_reached_ibfk_1;
-
-ALTER TABLE game
-MODIFY id INT NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE goal_reached
-ADD CONSTRAINT goal_reached_ibfk_1
-FOREIGN KEY (goal_id)
-REFERENCES game(id);
-
-Muttaa game taulussa, että pelaaja voi vain lisästä uniikin nimen
-ALTER TABLE game
-ADD UNIQUE (screen_name);
-
-ALTER TABLE game CHANGE co2_consumed balance INT(11) DEFAULT 2000;
-ALTER TABLE game CHANGE co2_budget flights INT(3) DEFAULT 0;
-
 Muutokset kokonaisuudessa mitä relaatiokantaan ollaan tehty:
 - country taulussa on Continent lisätty pääavaimeksi
 - goal_reached tauluun on lisätty continent_id, joka on vierasavain mikä viittaa countryn: continent pääavaimeen
@@ -24,3 +5,12 @@ Muutokset kokonaisuudessa mitä relaatiokantaan ollaan tehty:
 - game taulussa CO2 budjetti ja consumed on vaihdettu balance ja flight nimmisiin
 - balance default value on 2000
 - flight default value on 0
+
+alter table goal_reached add column continent.id varchar(40) NOT NULL;
+alter table goal_reached modify goal_id int(11) null;
+alter table game modify column game.id int not null auto_increment;
+alter table country add index idx (continent);
+alter table airport add constraint fk_iso foreign key (iso_country) references country(iso_country);
+alter table goal_reached add constraint fk_continent foreign key (continent_id) references country(continent);
+ALTER TABLE game CHANGE co2_consumed balance INT(11) DEFAULT 2000;
+ALTER TABLE game CHANGE co2_budget flights INT(3) DEFAULT 0;
