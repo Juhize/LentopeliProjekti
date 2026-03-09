@@ -1,0 +1,14 @@
+def tallenna_sijainti(game_id, airport_id):
+    sql = f"UPDATE game SET location = '{airport_id}' WHERE id = {game_id}"
+    kursori = yhteys.cursor()
+    kursori.execute(sql)
+    yhteys.commit()
+
+def valitse(tulos, numero, game_id):
+    if numero < 1 or numero > len(tulos):
+        print("Virheellinen valinta.")
+        return None
+    valittu_kenttä = tulos[numero - 1]
+    tallenna_sijainti(game_id, valittu_kenttä[0])
+    print(f"\nTervetuloa lentokentälle: {valittu_kenttä[0]}!")
+    return valittu_kenttä
