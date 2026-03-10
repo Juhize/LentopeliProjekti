@@ -1,4 +1,7 @@
+# Perustetaan funktio joka tarkistaa sen että onko pelaaja voittanut
+
 def tarkista_peli_loppu(player_id):
+    # lasketaan eri kontenentit siten että samaa kontinenttia ei lasketa monesti vaan se lasketaan kerran
     sql_kontinentit = f"""
         SELECT COUNT(DISTINCT continent_id) 
         FROM goal_reached 
@@ -19,6 +22,7 @@ def haet_pelaajan_tiedot(player_id):
     creation.execute(sql)
     tulos = creation.fetchone()
     if tulos:
+        # jos löytyy jotain tulostetaan tiedot muutoin peli jatkuu
         return {
             "nimi": tulos[0],
             "saldo": tulos[1],
@@ -39,6 +43,7 @@ def nayta_voittoruutu(pelaajan_nimi, saldo, kontinentit_kayty):
     print("\n" + "=" * 60)
 
 def nayta_highscore_lista():
+    # SQL hakee pelaajat järjestettynä saldon mukaan
     sql = "SELECT screen_name, balance, flights FROM game ORDER BY balance DESC LIMIT 10"
     try:
         creation.execute(sql)
@@ -49,6 +54,9 @@ def nayta_highscore_lista():
             print("=" * 60)
             print("#  Pelaaja                   Saldo      Lennot")
             print("-" * 60)
+            # enumerate(tulokset, 1) käy läpi tulokset yksi kerrallaan ja lisää niille järjestysnumeron alkaen numerosta 1
+            # idx = sijaluku listassa, esimerkiksi 1, 2, 3...
+            #
             for idx, (nimi, saldo, lennot) in enumerate(tulokset, 1):
                 print(f"{idx}  {nimi:<25} {saldo}      {lennot}")
             print("=" * 60 + "\n")
@@ -87,9 +95,9 @@ def nayta_tappio_ruutu(pelaajan_nimi, syy):
     print("=" * 60)
     print(f"\nPelaaja: {pelaajan_nimi}")
     if syy == "saldo":
-        print("Rahat loppuivat! Sinulla ei ole enää rahaa lennoille.")
+        print("Rahat loppuivat!")
 
-    print("\nEi hätää, yritä uudelleen!")
+    print("\nYritä uudelleen!")
     print("=" * 60)
 
 def tallenna_sijainti(player_name, airport_id):
@@ -290,6 +298,8 @@ while peli_käynnissä == True:
         "Valitse toiminto:\n1. Valitse uusi lentokenttä mihin lentää\n2. Näytä Nykyinen sijainti ja raha tilanne\n3. Näytä mantereet missä olet käynyt\n4. Säännöt\n5. Poistu pelistä\n")
     while valinta not in ["1", "2", "3", "4", "5"]:
         valinta = input("Tuntematon toiminto. Valitse uudelleen\n")
+
+    # Tarkisti vain kerran pelin lopetuksen vaihdoin siten että se tarkistaa jokaisen lennon jälkeen
     if valinta == "1":
         lentokenttä_arpoja()
         continent_lisääjä_lista.continent_tarkistus(player_name)
