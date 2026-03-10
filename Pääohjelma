@@ -1,4 +1,7 @@
+# Perustetaan funktio joka tarkistaa sen että onko pelaaja voittanut
+
 def tarkista_peli_loppu(player_id):
+    # lasketaan eri kontenentit siten että samaa kontinenttia ei lasketa monesti vaan se lasketaan kerrann
     sql_kontinentit = f"""
         SELECT COUNT(DISTINCT continent_id) 
         FROM goal_reached 
@@ -6,8 +9,7 @@ def tarkista_peli_loppu(player_id):
     """
     creation.execute(sql_kontinentit)
     kaydetyt_kontinentit = creation.fetchone()[0]
-    # Maailmassa on 7 kontinenttia
-    if kaydetyt_kontinentit >= 7:
+    if kaydetyt_kontinentit >= 5:
         return True
     return False
 
@@ -20,6 +22,7 @@ def haet_pelaajan_tiedot(player_id):
     creation.execute(sql)
     tulos = creation.fetchone()
     if tulos:
+        # jos löytyy jotain tulostetaan tiedot muutoin peli jatkuu
         return {
             "nimi": tulos[0],
             "saldo": tulos[1],
@@ -28,19 +31,19 @@ def haet_pelaajan_tiedot(player_id):
     return None
 
 def nayta_voittoruutu(pelaajan_nimi, saldo, kontinentit_kayty):
-
     print("\n" + "=" * 60)
     print("Onneksi olkoon!".center(60))
     print("=" * 60)
     print(f"\nPelaaja: {pelaajan_nimi}")
     print(f"Sinä olet onnistuneesti kiertänyt maailman ympäri!")
     print(f"\nPelitilastot:")
-    print(f"   • Käydyt kontinentit: {kontinentit_kayty}/7")
-    print(f"   • Jäljellä oleva saldo: {saldo} CO2")
+    print(f"   • Käydyt kontinentit: {kontinentit_kayty}/5")
+    print(f"   • Jäljellä oleva saldo: {saldo}€")
     print(f"   • Status: Voittaja!")
     print("\n" + "=" * 60)
 
 def nayta_highscore_lista():
+    # SQL hakee pelaajat järjestettynä saldon mukaan
     sql = "SELECT screen_name, balance, flights FROM game ORDER BY balance DESC LIMIT 10"
     try:
         creation.execute(sql)
@@ -51,6 +54,9 @@ def nayta_highscore_lista():
             print("=" * 60)
             print("#  Pelaaja                   Saldo      Lennot")
             print("-" * 60)
+            # enumerate(tulokset, 1) käy läpi tulokset yksi kerrallaan ja lisää niille järjestysnumeron alkaen numerosta 1
+            # idx = sijaluku listassa, esimerkiksi 1, 2, 3...
+            #
             for idx, (nimi, saldo, lennot) in enumerate(tulokset, 1):
                 print(f"{idx}  {nimi:<25} {saldo}      {lennot}")
             print("=" * 60 + "\n")
@@ -63,6 +69,8 @@ def kysytaan_uusi_peli():
     valinta = input("\nHaluatko pelata uudelleen? (1 = Kyllä, 2 = Ei): ")
     while valinta not in ["1", "2"]:
         valinta = input("Virheellinen valinta. Anna 1 tai 2: ")
+    if valinta == "1":
+        luonti_player_id.uusi_pelin_aloitus(player_name)
     return valinta == "1"
 
 
@@ -76,14 +84,12 @@ def tarkista_lopettaminen(player_id):
     tulos = creation.fetchone()
     if tulos:
         saldo, lennot = tulos
-        # Jos saldo on alle 0, peli loppuu
-        if saldo < 0:
+        # Jos saldo on 0 tai alle, peli loppuu
+        if saldo <= 0:
             return True, "saldo"
-        # Jos lennot ovat 0 eikä rahaa lisää, peli loppuu
-        if lennot == 0 and saldo < 50:
-            return True, "lennot"
 
     return False, None
+2
 
 
 def nayta_tappio_ruutu(pelaajan_nimi, syy):
@@ -92,11 +98,9 @@ def nayta_tappio_ruutu(pelaajan_nimi, syy):
     print("=" * 60)
     print(f"\nPelaaja: {pelaajan_nimi}")
     if syy == "saldo":
-        print("Rahat loppuivat! Sinulla ei ole enää rahaa lennoille")
-    elif syy == "lennot":
-        print("Loppuivat lennot! Sinulla ei ole enää rahaa matkalipuille.")
+        print("Rahat loppuivat!")
 
-    print("\nEi hätää, yritä uudelleen!")
+    print("\nYritä uudelleen!")
     print("=" * 60)
 
 def tallenna_sijainti(player_name, airport_id):
@@ -297,27 +301,38 @@ while peli_käynnissä == True:
         "Valitse toiminto:\n1. Valitse uusi lentokenttä mihin lentää\n2. Näytä Nykyinen sijainti ja raha tilanne\n3. Näytä mantereet missä olet käynyt\n4. Säännöt\n5. Poistu pelistä\n")
     while valinta not in ["1", "2", "3", "4", "5"]:
         valinta = input("Tuntematon toiminto. Valitse uudelleen\n")
+
+    # Tarkisti vain kerran pelin lopetuksen vaihdoin siten että se tarkistaa jokaisen lennon jälkeen
     if valinta == "1":
         lentokenttä_arpoja()
         continent_lisääjä_lista.continent_tarkistus(player_name)
-        try:
-            if tarkista_peli_loppu(player_id):
-                pelaajan_tiedot = haet_pelaajan_tiedot(player_id)
-                if pelaajan_tiedot:
-                    nayta_voittoruutu(
-                        pelaajan_tiedot["nimi"],
-                        pelaajan_tiedot["saldo"],
-                        7,
-                        yhteys_sql
-                    )
-                nayta_highscore_lista(yhteys_sql)
-
-                if kysytaan_uusi_peli():
-                    peli_käynnissä = False
-                else:
-                    peli_käynnissä = False
-        except Exception as e:
-            print(f"Virhe voitto-tarkistuksessa: {e}")
+        pitaa_lopettaa, syy = tarkista_lopettaminen(player_id)
+        if pitaa_lopettaa:
+            pelaajan_tiedot = haet_pelaajan_tiedot(player_id)
+            if pelaajan_tiedot:
+                nayta_tappio_ruutu(pelaajan_tiedot["nimi"], syy)
+            nayta_highscore_lista()
+            if kysytaan_uusi_peli():
+                peli_käynnissä = True
+            else:
+                peli_käynnissä = False
+        else:
+            try:
+                if tarkista_peli_loppu(player_id):
+                    pelaajan_tiedot = haet_pelaajan_tiedot(player_id)
+                    if pelaajan_tiedot:
+                        nayta_voittoruutu(
+                            pelaajan_tiedot["nimi"],
+                            pelaajan_tiedot["saldo"],
+                            5
+                        )
+                    nayta_highscore_lista()
+                    if kysytaan_uusi_peli():
+                        peli_käynnissä = True
+                    else:
+                        peli_käynnissä = False
+            except Exception as e:
+                print(f"Virhe voitto-tarkistuksessa: {e}")
 
     elif valinta == "2":
         pelaajan_tilanne.pelaajan_tilanne(player_name)
@@ -334,7 +349,8 @@ while peli_käynnissä == True:
     elif valinta == "5":
         peli_käynnissä = False
         nayta_highscore_lista()
-        print("Peli suljettu. Hei hei")
 
     else:
         print("Tuntematon toiminto\n")
+else:
+    print("Peli suljettu. Hei hei")
