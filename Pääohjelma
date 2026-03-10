@@ -89,8 +89,6 @@ def tarkista_lopettaminen(player_id):
             return True, "saldo"
 
     return False, None
-2
-
 
 def nayta_tappio_ruutu(pelaajan_nimi, syy):
     print("\n" + "=" * 60)
@@ -283,6 +281,10 @@ if peli_käynnissä == True:
 
             if pelaajan_tiedot:
                 nayta_tappio_ruutu(pelaajan_tiedot["nimi"], syy)
+                if kysytaan_uusi_peli():
+                    peli_käynnissä = True
+                else:
+                    peli_käynnissä= False
 
             nayta_highscore_lista(yhteys_sql)
 
