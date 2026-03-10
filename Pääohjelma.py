@@ -1,7 +1,7 @@
 # Perustetaan funktio joka tarkistaa sen että onko pelaaja voittanut
 
 def tarkista_peli_loppu(player_id):
-    # lasketaan eri kontenentit siten että samaa kontinenttia ei lasketa monesti vaan se lasketaan kerran
+    # lasketaan eri kontenentit siten että samaa kontinenttia ei lasketa monesti vaan se lasketaan kerrann
     sql_kontinentit = f"""
         SELECT COUNT(DISTINCT continent_id) 
         FROM goal_reached 
