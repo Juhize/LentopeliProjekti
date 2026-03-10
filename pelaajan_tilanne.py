@@ -1,0 +1,24 @@
+def pelaajan_tilanne(player_name):
+    creation = yhteys_sql.cursor()
+    # Tässä funktiossa etsimme pelaajan valitsemalla käyttäjänimellä hänen nykyisen sijainti ja ilmoitamme sen, kun hän aloittaa pelaamisen
+    # Printtaus tehdään funktion sisällä tässä
+    sql_sijainti = f"select country.name, airport.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}';"
+    creation.execute(sql_sijainti)
+    sql_sijainti_paikat = creation.fetchall()
+    for names in sql_sijainti_paikat:
+        print(f"Olet tällä hetkellä maassa: {names[0]}\nLentokenttällä: {names[1]}")
+    sql_haku = (f"select balance from game where screen_name = '{player_name}';")
+    creation.execute(sql_haku)
+    tilanne = creation.fetchall()
+    print(f"Rahasi tällä hetkellä: {tilanne[0][0]}€\n")
+
+import mysql.connector
+
+yhteys_sql = mysql.connector.connect(
+         host='127.0.0.1',
+         port= 3306,
+         database='flight_game',
+         user='root',
+         password='123456789',
+         autocommit=True
+         )

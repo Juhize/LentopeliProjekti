@@ -1,0 +1,350 @@
+def tarkista_peli_loppu(player_id):
+    sql_kontinentit = f"""
+        SELECT COUNT(DISTINCT continent_id) 
+        FROM goal_reached 
+        WHERE game_id = {player_id}
+    """
+    creation.execute(sql_kontinentit)
+    kaydetyt_kontinentit = creation.fetchone()[0]
+    if kaydetyt_kontinentit >= 5:
+        return True
+    return False
+
+def haet_pelaajan_tiedot(player_id):
+    sql = f"""
+        SELECT screen_name, balance, flights 
+        FROM game 
+        WHERE id = {player_id}
+    """
+    creation.execute(sql)
+    tulos = creation.fetchone()
+    if tulos:
+        return {
+            "nimi": tulos[0],
+            "saldo": tulos[1],
+            "lennot": tulos[2]
+        }
+    return None
+
+def nayta_voittoruutu(pelaajan_nimi, saldo, kontinentit_kayty):
+    print("\n" + "=" * 60)
+    print("Onneksi olkoon!".center(60))
+    print("=" * 60)
+    print(f"\nPelaaja: {pelaajan_nimi}")
+    print(f"Sinä olet onnistuneesti kiertänyt maailman ympäri!")
+    print(f"\nPelitilastot:")
+    print(f"   • Käydyt kontinentit: {kontinentit_kayty}/5")
+    print(f"   • Jäljellä oleva saldo: {saldo}€")
+    print(f"   • Status: Voittaja!")
+    print("\n" + "=" * 60)
+
+def nayta_highscore_lista():
+    sql = "SELECT screen_name, balance, flights FROM game ORDER BY balance DESC LIMIT 10"
+    try:
+        creation.execute(sql)
+        tulokset = creation.fetchall()
+        if tulokset:
+            print("\n" + "=" * 60)
+            print("HIGHSCORE TAULUKKO".center(60))
+            print("=" * 60)
+            print("#  Pelaaja                   Saldo      Lennot")
+            print("-" * 60)
+            for idx, (nimi, saldo, lennot) in enumerate(tulokset, 1):
+                print(f"{idx}  {nimi:<25} {saldo}      {lennot}")
+            print("=" * 60 + "\n")
+        else:
+            print("Ei vielä highscores!")
+    except Exception as err:
+        print(f"Virhe highscoren haussa: {err}")
+
+def kysytaan_uusi_peli():
+    valinta = input("\nHaluatko pelata uudelleen? (1 = Kyllä, 2 = Ei): ")
+    while valinta not in ["1", "2"]:
+        valinta = input("Virheellinen valinta. Anna 1 tai 2: ")
+    return valinta == "1"
+
+
+def tarkista_lopettaminen(player_id):
+    sql = f"""
+        SELECT balance, flights 
+        FROM game 
+        WHERE id = {player_id}
+    """
+    creation.execute(sql)
+    tulos = creation.fetchone()
+    if tulos:
+        saldo, lennot = tulos
+        # Jos saldo on 0 tai alle, peli loppuu
+        if saldo <= 0:
+            return True, "saldo"
+
+    return False, None
+
+
+def nayta_tappio_ruutu(pelaajan_nimi, syy):
+    print("\n" + "=" * 60)
+    print("PELI PÄÄTTYI".center(60))
+    print("=" * 60)
+    print(f"\nPelaaja: {pelaajan_nimi}")
+    if syy == "saldo":
+        print("Rahat loppuivat! Sinulla ei ole enää rahaa lennoille.")
+
+    print("\nEi hätää, yritä uudelleen!")
+    print("=" * 60)
+
+def tallenna_sijainti(player_name, airport_id):
+    sql = f"UPDATE game SET location = '{airport_id}' where screen_name = '{player_name}'"
+    kursori = yhteys_sql.cursor()
+    kursori.execute(sql)
+    yhteys_sql.commit()
+
+def flight_cost(seuraava_kentta):
+    # Seuraavassa haetaan erikseen kummankin lentokentän koordinaatit ja kohde lentokentän kokotyyppi
+    # Jouduin erittelemään haut, koska alkuperäisessä haun tuloksien järjestys vaihteli
+    sql1 = f"SELECT latitude_deg, longitude_deg FROM airport WHERE ident = (SELECT location FROM game WHERE id = {player_id})"
+    sql2 = f"SELECT latitude_deg, longitude_deg, type FROM airport WHERE ident = '{seuraava_kentta}'"
+    creation.execute(sql1)
+    kentta_1 = creation.fetchall()
+    creation.execute(sql2)
+    kentta_2 = creation.fetchall()
+    tulos = kentta_1, kentta_2
+    piste = {}
+    lista_avain = 0
+    for number in tulos:
+        # Nyt kun yhdistettiin 2 listaa tarvitaan ensiksi ideksi listaan ja sen jälkeen haettavaan arvoon
+        piste[lista_avain] = number[0][0], number[0][1]
+        lista_avain += 1
+    # .km lopussa jättää vastauksesta km pois, milloin saadaan muunnettua muuttuja int-muotoon
+    laskettu_matka = int(distance.distance(piste[0], piste[1]).km)
+    airport_type = kentta_2[0][-1]
+    if airport_type == "small_airport":
+        landing = 400
+    elif airport_type == "medium_airport":
+        landing = 600
+    elif airport_type == "large_airport":
+        landing = 800
+    cost = laskettu_matka * hinta_per_km + landing
+    return int(cost)
+
+def lento_kentät(nimi):
+    tulos = []
+
+    sql1 = f"SELECT airport.ident, airport.name, airport.type FROM airport JOIN country ON country.iso_country = airport.iso_country WHERE country.name = '{nimi}' and airport.type = 'small_airport' order by rand() limit 1"
+    kenttä1 = yhteys_sql.cursor()
+    kenttä1.execute(sql1)
+    pieni = kenttä1.fetchall()
+
+    sql2 = f"SELECT airport.ident, airport.name, airport.type FROM airport JOIN country ON country.iso_country = airport.iso_country WHERE country.name = '{nimi}' and airport.type = 'medium_airport' order by rand() limit 1"
+    kenttä2 = yhteys_sql.cursor()
+    kenttä2.execute(sql2)
+    keski = kenttä2.fetchall()
+
+    sql3 = f"SELECT airport.ident, airport.name, airport.type FROM airport JOIN country ON country.iso_country = airport.iso_country WHERE country.name = '{nimi}' and airport.type = 'large_airport' order by rand() limit 1"
+    kenttä3 = yhteys_sql.cursor()
+    kenttä3.execute(sql3)
+    iso = kenttä3.fetchall()
+
+    tulos = pieni + keski + iso
+    for i in range(len(tulos)):
+        print(f"{i + 1}. {tulos[i][1]}. Lennon hinta: {(flight_cost(tulos[i][0]))}€")
+    return tulos
+
+def valitse(tulos, numero, player_name):
+    if numero < 1 or numero > len(tulos):
+        print("Virheellinen valinta.")
+        return None
+    money(numero, tulos[0][0])
+    valittu_kenttä = tulos[numero - 1]
+    tallenna_sijainti(player_name, valittu_kenttä[0])
+    lentokenttä_1 = yhteys_sql.cursor()
+    sql_kentän_nimi = (
+        f"select airport.name from airport inner join game on location = ident where screen_name = '{player_name}'")
+    lentokenttä_1.execute(sql_kentän_nimi)
+    lentokenttä_sijainti = lentokenttä_1.fetchall()
+    print(f"\nTervetuloa lentokentälle: {lentokenttä_sijainti[0][0]}!")
+    return valittu_kenttä
+
+def player_id_finder(player_name):
+    # Tällä koodilla saamme koko ohjelmalle globaalin player_id, jotta peli voi hakea sitä jatkossa, jos on tarve
+    player_id = f"select game.id from game where screen_name = ('{player_name}')"
+    creation.execute(player_id)
+    playerid = creation.fetchall()
+    player_id = [id[0] for id in playerid]
+    player_id = player_id[0]
+    return player_id
+
+def lentokenttä_arpoja():
+    maan_nimi = ""
+    tulos = []
+    while not tulos:
+        maan_nimi = input("Anna maan nimi: ").lower()
+        nyky_maa = nykyinen_maa().lower()
+        if maan_nimi == nyky_maa:
+            maan_nimi = maan_nimi.upper()
+            print(f"Olet jo maassa {maan_nimi}")
+            break
+        tulos = lento_kentät(maan_nimi)
+        if not tulos:
+            print("Maata ei löydy")
+            break
+        elif tulos:
+            lentokentta = int(input("Mille lentokentälle haluat mennä? (1-3): "))
+            kentta = valitse(tulos, lentokentta, player_name)
+
+def nykyinen_maa():
+    kursori = yhteys_sql.cursor()
+    sql = f"select country.name from country inner join airport on country.iso_country = airport.iso_country inner join game on location = ident where screen_name = '{player_name}'"
+    kursori.execute(sql)
+    maa = kursori.fetchone()
+    if maa is None:
+        return None
+    return maa[0]
+
+def money(lentokentta, icao):
+    # Tämä funktio laskee pelaajan lennon tuoton - kulut ja laskee tehtyjen lentojen määrän
+    # Funktio myös ilmoittaa pelaajalle edellisen lennon tuoton, kulut, päivitetyn rahatilanteen, tehtyjen lentojen määrän, sekä nykyisen päästökertoimen.
+    # Mysteeri syystä ilman pyöristystä luvusta saadaan enemmän desimaaleja, kun pitäisi.
+    creation.execute(f"SELECT flights FROM game WHERE id = {player_id}")
+    lennot = creation.fetchone()
+    flight_counter = lennot[0]
+    CO2Tax = round(1 - (flight_counter // 3 * 0.2), 1)
+    CO2Tax = max(0.2, CO2Tax)
+    # Seuraavassa haetaan aktiivisen pelaajan rahamäärä
+    creation.execute(f"SELECT balance FROM game WHERE id = {player_id}")
+    rahat = creation.fetchone()
+    pieni = random.randint(200, 1000) * CO2Tax
+    keskikoko = random.randint(300, 1500) * CO2Tax
+    suuri = random.randint(400, 2000) * CO2Tax
+    kulut = flight_cost(icao)
+    if lentokentta == 1:
+        tuotto = pieni
+    elif lentokentta == 2:
+        tuotto = keskikoko
+    elif lentokentta == 3:
+        tuotto = suuri
+    flight_counter += 1
+    balance = rahat[0] + tuotto - kulut
+    print(
+        f"\nRahat ennen lentoa: {int(rahat[0])}€ \nTuotto: {int(tuotto)}€ \nKulut yhteensä:-{int(kulut)}€ \nSinulla on nyt {int(balance)}€ rahaa.")
+    print(
+        f"Olet suorittanut {int(flight_counter)} lentoa. \nPäästökertoimesi on {round(1 - (flight_counter // 3 * 0.2), 1)}")
+    # Seuraavassa päivitetään uusi rahamäärä ja lentojen määrä aktiiviselle pelaajalle
+    creation.execute(f'UPDATE game SET balance = {int(balance)}, flights = {int(flight_counter)} WHERE id={player_id}')
+    # if balance <= 0:
+    # lopetus_funktio()?
+
+import mysql.connector
+import random
+from geopy import distance
+import ctypes
+import luonti_player_id
+import pelaajan_tilanne
+import continent_lisääjä_lista
+
+yhteys_sql = mysql.connector.connect(
+    host='127.0.0.1',
+    port=3306,
+    database='flight_game',
+    user='root',
+    password='123456789',
+    autocommit=True
+)
+
+creation = yhteys_sql.cursor()
+
+player_name = luonti_player_id.peli_valikko()
+
+peli_käynnissä = True
+
+# Tätä voi muuttaa suuremmaksi tai pienemmäksi, jos peli on liian helppo tai vaikea
+hinta_per_km = 0.4
+
+if player_name == "":
+    peli_käynnissä = False
+
+if peli_käynnissä == True:
+    player_id = luonti_player_id.player_id_finder(player_name)
+    try:
+        pitaa_lopettaa, syy = tarkista_lopettaminen(player_id)
+
+        if pitaa_lopettaa:
+            pelaajan_tiedot = haet_pelaajan_tiedot(player_id)
+
+            if pelaajan_tiedot:
+                nayta_tappio_ruutu(pelaajan_tiedot["nimi"], syy)
+
+            nayta_highscore_lista(yhteys_sql)
+
+            if kysytaan_uusi_peli():
+                peli_käynnissä = False
+            else:
+                peli_käynnissä = False
+    except Exception as e:
+        print(f"Virhe häviö-tarkistuksessa: {e}")
+
+    print(f"Pelaat nyt käyttäjällä: {player_name}")
+    pelaajan_tilanne.pelaajan_tilanne(player_name)
+
+while peli_käynnissä == True:
+    valinta = input(
+        "Valitse toiminto:\n1. Valitse uusi lentokenttä mihin lentää\n2. Näytä Nykyinen sijainti ja raha tilanne\n3. Näytä mantereet missä olet käynyt\n4. Säännöt\n5. Poistu pelistä\n")
+    while valinta not in ["1", "2", "3", "4", "5"]:
+        valinta = input("Tuntematon toiminto. Valitse uudelleen\n")
+    if valinta == "1":
+        lentokenttä_arpoja()
+        continent_lisääjä_lista.continent_tarkistus(player_name)
+        pitaa_lopettaa, syy = tarkista_lopettaminen(player_id)
+        if pitaa_lopettaa:
+            pelaajan_tiedot = haet_pelaajan_tiedot(player_id)
+            if pelaajan_tiedot:
+                nayta_tappio_ruutu(pelaajan_tiedot["nimi"], syy)
+            nayta_highscore_lista()
+            if kysytaan_uusi_peli():
+                player_name = luonti_player_id.peli_valikko()
+                if player_name != "":
+                    player_id = luonti_player_id.player_id_finder(player_name)
+                else:
+                    peli_käynnissä = False
+            else:
+                peli_käynnissä = False
+        else:
+            try:
+                if tarkista_peli_loppu(player_id):
+                    pelaajan_tiedot = haet_pelaajan_tiedot(player_id)
+                    if pelaajan_tiedot:
+                        nayta_voittoruutu(
+                            pelaajan_tiedot["nimi"],
+                            pelaajan_tiedot["saldo"],
+                            5
+                        )
+                    nayta_highscore_lista()
+                    if kysytaan_uusi_peli():
+                        player_name = luonti_player_id.peli_valikko()
+                        if player_name != "":
+                            player_id = luonti_player_id.player_id_finder(player_name)
+                        else:
+                            peli_käynnissä = False
+                    else:
+                        peli_käynnissä = False
+            except Exception as e:
+                print(f"Virhe voitto-tarkistuksessa: {e}")
+
+    elif valinta == "2":
+        pelaajan_tilanne.pelaajan_tilanne(player_name)
+    elif valinta == "3":
+        continent_lisääjä_lista.continent_lista(player_id)
+    elif valinta == "4":
+        mymessage = 'Pelissä lennetään rahtia ympäri maailmaa, minkä avulla on tarkoitus rahoittaa pelaajan matka viidelle eri mantereelle.' \
+                    '\nPeli arpoo jokaisella kierroksella pelaajan valittavaksi 3 eri kokoista lentokenttää. Pelaaja saa rahaa vietyään rahtia lentokentälle lentokentän koon mukaan:\n1.Pieni kenttä:\nLaskeutuminen -400€\nTuotto: 200€ - 1000€\n2.Keskikokoinen kenttä:\nLaskeutuminen: -600€\nTuotto: 300€ - 1500€\n3.Suuri kenttä:\nLaskeutuminen -800€\nTuotto: 400€ - 2000€' \
+                    '\nPelissä on kolmen lennon välein kutistuva päästökerroin 1 - 0.2, mikä vähentää pelaajalle kertyvää tuottoa kertoimen verran.' \
+                    '\nMaavalinnassa maan nimi on ilmoitettava englanniksi.'
+        title = 'Säännöt'
+        ctypes.windll.user32.MessageBoxW(0, mymessage, title, 0)
+
+    elif valinta == "5":
+        peli_käynnissä = False
+        nayta_highscore_lista()
+        print("Peli suljettu. Hei hei")
+
+    else:
+        print("Tuntematon toiminto\n")
