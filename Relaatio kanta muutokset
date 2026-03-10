@@ -22,3 +22,6 @@ CREATE TABLE IF NOT EXISTS highscore (
   flights_count INT NOT NULL,
   finished_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+
+HUOM! Jos et käytä roottia vaan localhost käyttäjää:
+GRANT DELETE ON game TO 'käyttäjä_nimi'@localhost;
