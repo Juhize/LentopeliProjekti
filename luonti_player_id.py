@@ -132,16 +132,16 @@ def uusi_pelin_aloitus(annettu_player_name):
     sql_flight_reset = f"update game set flights = 0 where screen_name = '{annettu_player_name}'"
     sql_aloitus_maa = f"UPDATE game SET location = '{location}' WHERE screen_name = '{annettu_player_name}'"
     sql_aloitus_manner = f"INSERT INTO goal_reached(game_id, continent_id) VALUES('{player_id}', '{continent}')"
-     for suoritus in (continent_id_delete, sql_raha_reset, sql_flight_reset, sql_aloitus_maa, sql_aloitus_manner):
+    for suoritus in (continent_id_delete, sql_raha_reset, sql_flight_reset, sql_aloitus_maa, sql_aloitus_manner):
         creation.execute(suoritus)
 
 import mysql.connector
 
 yhteys_sql = mysql.connector.connect(
-         host='127.0.0.1',
-         port= 3306,
-         database='flight_game',
-         user='osku',
-         password='1230',
-         autocommit=True
-         )
+        host='127.0.0.1',
+        port= 3306,
+        database='flight_game',
+        user='osku',
+        password='1230',
+        autocommit=True
+        )

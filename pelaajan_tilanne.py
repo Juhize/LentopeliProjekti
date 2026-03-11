@@ -15,10 +15,10 @@ def pelaajan_tilanne(player_name):
 import mysql.connector
 
 yhteys_sql = mysql.connector.connect(
-         host='127.0.0.1',
-         port= 3306,
-         database='flight_game',
-         user='osku',
-         password='1230',
-         autocommit=True
-         )
+    host='127.0.0.1',
+    port= 3306,
+    database='flight_game',
+    user='osku',
+    password='1230',
+    autocommit=True
+    )
